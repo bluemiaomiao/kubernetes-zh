@@ -1,19 +1,3 @@
-/*
-Copyright 2019 The Kubernetes Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package cmd
 
 import (
@@ -50,39 +34,39 @@ import (
 
 var (
 	initDoneTempl = template.Must(template.New("init").Parse(dedent.Dedent(`
-		Your Kubernetes control-plane has initialized successfully!
+		您的Kubernetes控制面已经初始化完成!
 
-		To start using your cluster, you need to run the following as a regular user:
+		要开始使用集群，您需要作为普通用户运行以下命令:
 
 		  mkdir -p $HOME/.kube
 		  sudo cp -i {{.KubeConfigPath}} $HOME/.kube/config
 		  sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
-		Alternatively, if you are the root user, you can run:
+		或者, 如果你是root用户, 那么可以运行:
 
 		  export KUBECONFIG=/etc/kubernetes/admin.conf
 
-		You should now deploy a pod network to the cluster.
-		Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
+		您现在应该在集群上部署一个Pod网络.
+		使用下列选项之一运行 "kubectl apply-f[podnetwork].yaml":
 		  https://kubernetes.io/docs/concepts/cluster-administration/addons/
 
 		{{if .ControlPlaneEndpoint -}}
 		{{if .UploadCerts -}}
-		You can now join any number of the control-plane node running the following command on each as root:
+		现在，您可以将在每个节点上运行以下命令，将任意数量的控制平面节点连接为根节点:
 
 		  {{.joinControlPlaneCommand}}
 
-		Please note that the certificate-key gives access to cluster sensitive data, keep it secret!
-		As a safeguard, uploaded-certs will be deleted in two hours; If necessary, you can use
-		"kubeadm init phase upload-certs --upload-certs" to reload certs afterward.
+		请注意，证书密钥允许访问群集敏感数据，请保密！
+		作为保障措施, 上传的证书将在两小时内删除; 如有必要, 您可以使用
+		"kubeadm init phase upload-certs --upload-certs" 来重新加载证书。
 
 		{{else -}}
-		You can now join any number of control-plane nodes by copying certificate authorities
-		and service account keys on each node and then running the following as root:
+		现在，通过复制每个节点上的证书颁发机构和服务帐户密钥，然后以root用户身份运行以下命令，
+		可以加入任意数量的控制平面节点:
 
 		  {{.joinControlPlaneCommand}}
 
-		{{end}}{{end}}Then you can join any number of worker nodes by running the following on each as root:
+		{{end}}{{end}}然后，通过以根用户身份在每个节点上运行以下命令，可以加入任意数量的工作节点:
 
 		{{.joinWorkerCommand}}
 		`)))
