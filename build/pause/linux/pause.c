@@ -30,7 +30,7 @@ limitations under the License.
 #endif
 
 static void sigdown(int signo) {
-  psignal(signo, "Shutting down, got signal");
+  psignal(signo, "收到信号, 正在关闭...");
   exit(0);
 }
 
@@ -49,8 +49,8 @@ int main(int argc, char **argv) {
   }
 
   if (getpid() != 1)
-    /* Not an error because pause sees use outside of infra containers. */
-    fprintf(stderr, "Warning: pause should be the first process\n");
+    /* 这不是一个错误因为 pause 可以查看基础容器外的使用. */
+    fprintf(stderr, "警告: pause 应该是第一个进程\n");
 
   if (sigaction(SIGINT, &(struct sigaction){.sa_handler = sigdown}, NULL) < 0)
     return 1;
@@ -63,6 +63,6 @@ int main(int argc, char **argv) {
 
   for (;;)
     pause();
-  fprintf(stderr, "Error: infinite loop terminated\n");
+  fprintf(stderr, "错误: 无限循环终止\n");
   return 42;
 }

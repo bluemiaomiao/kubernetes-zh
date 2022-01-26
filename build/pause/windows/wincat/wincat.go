@@ -29,19 +29,19 @@ import (
 
 func main() {
 	if len(os.Args) != 3 {
-		log.Fatalln("usage: wincat <host> <port>")
+		log.Fatalln("使用方法: wincat <host> <port>")
 	}
 	host := os.Args[1]
 	port := os.Args[2]
 
 	addr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%s", host, port))
 	if err != nil {
-		log.Fatalf("Failed to resolve TCP addr %v %v", host, port)
+		log.Fatalf("无法解析TCP地址: %v %v", host, port)
 	}
 
 	conn, err := net.DialTCP("tcp", nil, addr)
 	if err != nil {
-		log.Fatalf("Failed to connect to %s:%s because %s", host, port, err)
+		log.Fatalf("无法连接到 %s:%s , 因为 %s", host, port, err)
 	}
 	defer conn.Close()
 
@@ -58,7 +58,7 @@ func main() {
 
 		_, err := io.Copy(os.Stdout, conn)
 		if err != nil {
-			log.Printf("error while copying stream to stdout: %v", err)
+			log.Printf("将流复制到标准输出时出错: %v", err)
 		}
 	}()
 
@@ -70,7 +70,7 @@ func main() {
 
 		_, err := io.Copy(conn, os.Stdin)
 		if err != nil {
-			log.Printf("error while copying stream from stdin: %v", err)
+			log.Printf("将流复制到标准输入时出错: %v", err)
 		}
 	}()
 

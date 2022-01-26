@@ -25,12 +25,12 @@ int main() {
   if (pid == 0) {
     while (getppid() > 1)
       ;
-    printf("Child exiting: pid=%d ppid=%d\n", getpid(), getppid());
+    printf("子进程退出: pid=%d ppid=%d\n", getpid(), getppid());
     return 0;
   } else if (pid > 0) {
-    printf("Parent exiting: pid=%d ppid=%d\n", getpid(), getppid());
+    printf("父进程退出: pid=%d ppid=%d\n", getpid(), getppid());
     return 0;
   }
-  perror("Could not create child");
+  perror("无法创建子进程");
   return 1;
 }

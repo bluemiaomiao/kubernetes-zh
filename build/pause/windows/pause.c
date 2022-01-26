@@ -22,11 +22,11 @@ BOOL WINAPI CtrlHandler(DWORD fdwCtrlType)
 	switch (fdwCtrlType)
 	{
 	case CTRL_C_EVENT:
-		fprintf(stderr, "Shutting down, got signal\n");
+		fprintf(stderr, "收到信号, 正在关闭...\n");
 		exit(0);
 
 	case CTRL_BREAK_EVENT:
-		fprintf(stderr, "Shutting down, got signal\n");
+		fprintf(stderr, "收到信号, 正在关闭...\n");
 		exit(0);
 
 	default:
@@ -42,7 +42,7 @@ int main(void)
 	}
 	else
 	{
-		printf("\nERROR: Could not set control handler\n");
+		printf("\n错误: 无法设置控制器\n");
 		return 1;
 	}
 	return 0;
