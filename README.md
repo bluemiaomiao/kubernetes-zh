@@ -8,13 +8,13 @@
 
 ```shell
 mkdir $GOPATH/src/k8s.io && cd $GOPATH/src/k8s.io
-git clone https://github.com/bluemiaomiao/kubernetes-zh.git
+git clone https://github.com/bluemiaomiao/kubernetes-zh.git kubernetes
 ```
 
 - 安装依赖并编译
 
 ```shell
-cd kubernetes-zh && go mod tidy
+cd kubernetes-zh && go mod download
 make
 ls -alh ./_output
 ```

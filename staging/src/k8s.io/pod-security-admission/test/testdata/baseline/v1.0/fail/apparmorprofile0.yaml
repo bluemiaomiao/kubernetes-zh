@@ -6,8 +6,8 @@ metadata:
   name: apparmorprofile0
 spec:
   containers:
-  - image: k8s.gcr.io/pause
-    name: container1
+    - image: k8s.gcr.io/pause
+      name: container1
   initContainers:
-  - image: k8s.gcr.io/pause
-    name: initcontainer1
+    - image: k8s.gcr.io/pause
+      name: initcontainer1
