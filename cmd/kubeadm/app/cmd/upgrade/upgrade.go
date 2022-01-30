@@ -39,7 +39,7 @@ type applyPlanFlags struct {
 	out                       io.Writer
 }
 
-// NewCmdUpgrade returns the cobra command for `kubeadm upgrade`
+// NewCmdUpgrade 返回kubeadm upgrade命令
 func NewCmdUpgrade(out io.Writer) *cobra.Command {
 	flags := &applyPlanFlags{
 		kubeConfigPath:            kubeadmconstants.GetAdminKubeConfigPath(),

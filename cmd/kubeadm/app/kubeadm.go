@@ -2,6 +2,7 @@ package app
 
 import (
 	"flag"
+	"fmt"
 	"os"
 
 	"k8s.io/kubernetes/cmd/kubeadm/app/cmd"
@@ -30,6 +31,7 @@ func Run() error {
 	pflag.CommandLine.MarkHidden("stderrthreshold")
 	pflag.CommandLine.MarkHidden("vmodule")
 
+	fmt.Println("执行: cmd/kubeadm/app/kubeadm.go[Run][NewKubeadmCommand]")
 	cmd := cmd.NewKubeadmCommand(os.Stdin, os.Stdout, os.Stderr)
 	return cmd.Execute()
 }

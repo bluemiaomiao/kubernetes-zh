@@ -17,10 +17,12 @@ limitations under the License.
 package main
 
 import (
+	"fmt"
 	"k8s.io/kubernetes/cmd/kubeadm/app"
 	kubeadmutil "k8s.io/kubernetes/cmd/kubeadm/app/util"
 )
 
 func main() {
+	fmt.Println("执行: cmd/kubeadm/kubeadm.go[main][CheckErr]")
 	kubeadmutil.CheckErr(app.Run())
 }

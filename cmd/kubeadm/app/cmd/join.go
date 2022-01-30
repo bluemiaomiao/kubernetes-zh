@@ -149,9 +149,8 @@ type joinData struct {
 	patchesDir            string
 }
 
-// newCmdJoin returns "kubeadm join" command.
-// NB. joinOptions is exposed as parameter for allowing unit testing of
-//     the newJoinData method, that implements all the command options validation logic
+// newCmdJoin 返回kubeadm join命令
+// 注意. joinOptions作为参数公开，以允许对实现所有命令选项验证逻辑的newJoinData方法进行单元测试
 func newCmdJoin(out io.Writer, joinOptions *joinOptions) *cobra.Command {
 	if joinOptions == nil {
 		joinOptions = newJoinOptions()

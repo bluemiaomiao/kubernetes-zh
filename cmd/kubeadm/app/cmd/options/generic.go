@@ -83,7 +83,7 @@ func AddKubernetesVersionFlag(fs *pflag.FlagSet, kubernetesVersion *string) {
 	)
 }
 
-// AddKubeadmOtherFlags adds flags that are not bound to a configuration file to the given flagset
+// AddKubeadmOtherFlags 将未绑定到配置文件的标志添加到给定的标志集
 func AddKubeadmOtherFlags(flagSet *pflag.FlagSet, rootfsPath *string) {
 	flagSet.StringVar(
 		rootfsPath, "rootfs", *rootfsPath,

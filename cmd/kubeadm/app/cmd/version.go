@@ -35,17 +35,18 @@ type Version struct {
 	ClientVersion *apimachineryversion.Info `json:"clientVersion"`
 }
 
-// newCmdVersion provides the version information of kubeadm.
+// newCmdVersion 提供kubeadm的版本信息
 func newCmdVersion(out io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "version",
-		Short: "Print the version of kubeadm",
+		Short: "打印kubeadm的版本信息",
+		Long:  "打印kubeadm相关的详细版本信息",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return RunVersion(out, cmd)
 		},
 		Args: cobra.NoArgs,
 	}
-	cmd.Flags().StringP("output", "o", "", "Output format; available options are 'yaml', 'json' and 'short'")
+	cmd.Flags().StringP("output", "o", "", "输出格式, 可用的选项有: 'yaml', 'json' and 'short'")
 	return cmd
 }
 

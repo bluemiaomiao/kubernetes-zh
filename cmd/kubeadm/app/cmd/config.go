@@ -50,7 +50,7 @@ import (
 	flag "github.com/spf13/pflag"
 )
 
-// newCmdConfig returns cobra.Command for "kubeadm config" command
+// newCmdConfig 返回 "kubeadm config" 命令
 func newCmdConfig(out io.Writer) *cobra.Command {
 	var kubeConfigFile string
 

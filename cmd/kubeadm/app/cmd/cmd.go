@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"io"
 
 	"k8s.io/kubernetes/cmd/kubeadm/app/cmd/alpha"
@@ -30,9 +31,11 @@ import (
 )
 
 // NewKubeadmCommand 返回 cobra.Command 去运行kubeadm命令
+// out参数是标准输出
 func NewKubeadmCommand(in io.Reader, out, err io.Writer) *cobra.Command {
 	var rootfsPath string
 
+	// 显示与kubeadm主命令相关的帮助信息
 	cmds := &cobra.Command{
 		Use:   "kubeadm",
 		Short: "kuibeadm: 轻松的启动一个安全的Kubernetes集群",
@@ -77,9 +80,12 @@ func NewKubeadmCommand(in io.Reader, out, err io.Writer) *cobra.Command {
 			return nil
 		},
 	}
+	// end:显示与kubeadm主命令相关的帮助信息
 
 	cmds.ResetFlags()
 
+	// 挂载子命令
+	fmt.Println("执行: cmd/kubeadm/app/cmd/cmd.go[NewKubeadmCommand][AddCommand] x 10")
 	cmds.AddCommand(newCmdCertsUtility(out))
 	cmds.AddCommand(newCmdCompletion(out, ""))
 	cmds.AddCommand(newCmdConfig(out))
@@ -92,6 +98,7 @@ func NewKubeadmCommand(in io.Reader, out, err io.Writer) *cobra.Command {
 	cmds.AddCommand(alpha.NewCmdAlpha())
 	options.AddKubeadmOtherFlags(cmds.PersistentFlags(), &rootfsPath)
 	cmds.AddCommand(newCmdKubeConfigUtility(out))
+	// end:挂载子命令
 
 	return cmds
 }

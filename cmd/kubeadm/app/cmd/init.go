@@ -113,18 +113,24 @@ type initData struct {
 	patchesDir              string
 }
 
-// newCmdInit returns "kubeadm init" command.
-// NB. initOptions is exposed as parameter for allowing unit testing of
-//     the newInitOptions method, that implements all the command options validation logic
+// newCmdInit 返回kubeadm init命令
+// 注意. initOptions作为参数公开，以允许对newInitOptions方法进行单元测试，该方法实现了所有命令选项验证逻辑
 func newCmdInit(out io.Writer, initOptions *initOptions) *cobra.Command {
+	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit]...")
+	// 如果没有指定初始化的选项, 那么创建一个新的初始化选项
 	if initOptions == nil {
 		initOptions = newInitOptions()
 	}
+
+	// 构建一个Runner来运行这个Workflow
 	initRunner := workflow.NewRunner()
 
+	// 构建了一个cobra.Command的结构体
 	cmd := &cobra.Command{
 		Use:   "init",
-		Short: "Run this command in order to set up the Kubernetes control plane",
+		Short: "运行此命令以设置Kubernetes控制平面",
+		// Run函数与RunE函数都是运行命令的功能函数, 但是当功能执行错误之后, Run需要手动调用cmd.Help(), RunE函数会自动调用
+		// 并且如果Run与RunE同时在cobra.Command结构体对象中实现, 那么RunE函数的调用优先级高于Run函数
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := initRunner.InitData(args)
 			if err != nil {
@@ -132,19 +138,29 @@ func newCmdInit(out io.Writer, initOptions *initOptions) *cobra.Command {
 			}
 
 			data := c.(*initData)
-			fmt.Printf("[init] Using Kubernetes version: %s\n", data.cfg.KubernetesVersion)
+			fmt.Printf("[初始化] 使用的Kubernetes版本: %s\n", data.cfg.KubernetesVersion)
 
+			// 让初始化Runner运行起来
 			if err := initRunner.Run(args); err != nil {
 				return err
 			}
 
+			// 打印kubeadm join的链接
 			return showJoinCommand(data, out)
 		},
 		Args: cobra.NoArgs,
 	}
 
-	// adds flags to the init command
-	// init command local flags could be eventually inherited by the sub-commands automatically generated for phases
+	// TODO: 猜测是将一些标志保存起来, 然后如果其他阶段产生了子任务, 可能会使用到这些标志
+	// 添加标志到init命令中
+	// init命令本地的标志最终可能会被自动为其他阶段生成的子命令使用
+	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][AddInitConfigFlags]")
+	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][AddClusterConfigFlags]")
+	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][AddInitOtherFlags]")
+	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][AddTokenFlag]")
+	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][AddTTLFlag]")
+	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][AddImageMetaFlags]")
+
 	AddInitConfigFlags(cmd.Flags(), initOptions.externalInitCfg)
 	AddClusterConfigFlags(cmd.Flags(), initOptions.externalClusterCfg, &initOptions.featureGatesString)
 	AddInitOtherFlags(cmd.Flags(), initOptions)
@@ -152,15 +168,20 @@ func newCmdInit(out io.Writer, initOptions *initOptions) *cobra.Command {
 	initOptions.bto.AddTTLFlag(cmd.Flags())
 	options.AddImageMetaFlags(cmd.Flags(), &initOptions.externalClusterCfg.ImageRepository)
 
-	// defines additional flag that are not used by the init command but that could be eventually used
-	// by the sub-commands automatically generated for phases
+	// 定义init命令未使用但最终可由其他阶段自动生成的子命令使用的附加标志
+	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][SetAdditionalFlags]")
 	initRunner.SetAdditionalFlags(func(flags *flag.FlagSet) {
+		fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][AddKubeConfigFlag]")
+		fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][AddKubeConfigDirFlag]")
+		fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][AddControlPlanExtraArgsFlags]")
+
 		options.AddKubeConfigFlag(flags, &initOptions.kubeconfigPath)
 		options.AddKubeConfigDirFlag(flags, &initOptions.kubeconfigDir)
 		options.AddControlPlanExtraArgsFlags(flags, &initOptions.externalClusterCfg.APIServer.ExtraArgs, &initOptions.externalClusterCfg.ControllerManager.ExtraArgs, &initOptions.externalClusterCfg.Scheduler.ExtraArgs)
 	})
 
-	// initialize the workflow runner with the list of phases
+	// 使用不同阶段(Phase)的任务初始化Workflow的Runner
+	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][AppendPhase] x 13")
 	initRunner.AppendPhase(phases.NewPreflightPhase())
 	initRunner.AppendPhase(phases.NewCertsPhase())
 	initRunner.AppendPhase(phases.NewKubeConfigPhase())
@@ -175,28 +196,29 @@ func newCmdInit(out io.Writer, initOptions *initOptions) *cobra.Command {
 	initRunner.AppendPhase(phases.NewKubeletFinalizePhase())
 	initRunner.AppendPhase(phases.NewAddonPhase())
 
-	// sets the data builder function, that will be used by the runner
-	// both when running the entire workflow or single phases
+	// 设置数据生成器函数, 在Runner整个Workflow或者单个阶段上都使用该函数
+	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][SetDataInitializer]")
 	initRunner.SetDataInitializer(func(cmd *cobra.Command, args []string) (workflow.RunData, error) {
 		data, err := newInitData(cmd, args, initOptions, out)
 		if err != nil {
 			return nil, err
 		}
-		// If the flag for skipping phases was empty, use the values from config
+		// 如果跳过阶段的标志为空，请使用配置中的值
 		if len(initRunner.Options.SkipPhases) == 0 {
 			initRunner.Options.SkipPhases = data.cfg.SkipPhases
 		}
 		return data, nil
 	})
 
-	// binds the Runner to kubeadm init command by altering
-	// command help, adding --skip-phases flag and by adding phases subcommands
+	// 通过更改命令帮助、添加--skip phases标志和添加phases子命令，将运行程序绑定到kubeadm init命令
+	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][BindToCommand]")
 	initRunner.BindToCommand(cmd)
 
+	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit]...Done")
 	return cmd
 }
 
-// AddInitConfigFlags adds init flags bound to the config to the specified flagset
+// AddInitConfigFlags 将绑定到配置的初始化标志添加到指定的标志集
 func AddInitConfigFlags(flagSet *flag.FlagSet, cfg *kubeadmapiv1.InitConfiguration) {
 	flagSet.StringVar(
 		&cfg.LocalAPIEndpoint.AdvertiseAddress, options.APIServerAdvertiseAddress, cfg.LocalAPIEndpoint.AdvertiseAddress,
@@ -217,7 +239,7 @@ func AddInitConfigFlags(flagSet *flag.FlagSet, cfg *kubeadmapiv1.InitConfigurati
 	cmdutil.AddCRISocketFlag(flagSet, &cfg.NodeRegistration.CRISocket)
 }
 
-// AddClusterConfigFlags adds cluster flags bound to the config to the specified flagset
+// AddClusterConfigFlags 将绑定到配置的群集标志添加到指定的标志集
 func AddClusterConfigFlags(flagSet *flag.FlagSet, cfg *kubeadmapiv1.ClusterConfiguration, featureGatesString *string) {
 	flagSet.StringVar(
 		&cfg.Networking.ServiceSubnet, options.NetworkingServiceSubnet, cfg.Networking.ServiceSubnet,
@@ -250,8 +272,8 @@ func AddClusterConfigFlags(flagSet *flag.FlagSet, cfg *kubeadmapiv1.ClusterConfi
 	options.AddFeatureGatesStringFlag(flagSet, featureGatesString)
 }
 
-// AddInitOtherFlags adds init flags that are not bound to a configuration file to the given flagset
-// Note: All flags that are not bound to the cfg object should be allowed in cmd/kubeadm/app/apis/kubeadm/validation/validation.go
+// AddInitOtherFlags 将未绑定到配置文件的初始化标志添加到给定标志集
+// 注意: cmd/kubeadm/app/apis/kubeadm/validation/validation.go 应该允许所有未绑定cfg对象的标志
 func AddInitOtherFlags(flagSet *flag.FlagSet, initOptions *initOptions) {
 	options.AddConfigFlag(flagSet, &initOptions.cfgPath)
 	flagSet.StringSliceVar(
@@ -277,18 +299,18 @@ func AddInitOtherFlags(flagSet *flag.FlagSet, initOptions *initOptions) {
 	options.AddPatchesFlag(flagSet, &initOptions.patchesDir)
 }
 
-// newInitOptions returns a struct ready for being used for creating cmd init flags.
+// newInitOptions 返回可用于创建init命令标志的结构。
 func newInitOptions() *initOptions {
-	// initialize the public kubeadm config API by applying defaults
+	// 通过应用默认值初始化公共kubeadm配置API
 	externalInitCfg := &kubeadmapiv1.InitConfiguration{}
 	kubeadmscheme.Scheme.Default(externalInitCfg)
 
 	externalClusterCfg := &kubeadmapiv1.ClusterConfiguration{}
 	kubeadmscheme.Scheme.Default(externalClusterCfg)
 
-	// Create the options object for the bootstrap token-related flags, and override the default value for .Description
+	// 为引导令牌相关标志创建options对象，并覆盖其默认值.Description
 	bto := options.NewBootstrapTokenOptions()
-	bto.Description = "The default bootstrap token generated by 'kubeadm init'."
+	bto.Description = "kubeadm init生成的默认引导令牌"
 
 	return &initOptions{
 		externalInitCfg:    externalInitCfg,
@@ -571,14 +593,14 @@ func printJoinCommand(out io.Writer, adminKubeConfigPath, token string, i *initD
 	return initDoneTempl.Execute(out, ctx)
 }
 
-// showJoinCommand prints the join command after all the phases in init have finished
+// showJoinCommand 在init中的所有阶段完成后打印join命令
 func showJoinCommand(i *initData, out io.Writer) error {
 	adminKubeConfigPath := i.KubeConfigPath()
 
-	// Prints the join command, multiple times in case the user has multiple tokens
+	// 如果用户有多个令牌，则多次打印join命令
 	for _, token := range i.Tokens() {
 		if err := printJoinCommand(out, adminKubeConfigPath, token, i); err != nil {
-			return errors.Wrap(err, "failed to print join command")
+			return errors.Wrap(err, "打印join命令失败")
 		}
 	}
 

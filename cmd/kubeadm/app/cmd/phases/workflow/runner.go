@@ -25,29 +25,27 @@ import (
 	"github.com/spf13/pflag"
 )
 
-// phaseSeparator defines the separator to be used when concatenating nested
-// phase names
+// phaseSeparator 定义连接嵌套阶段名称时要使用的分隔符
 const phaseSeparator = "/"
 
-// RunnerOptions defines the options supported during the execution of a
-// kubeadm composable workflows
+// RunnerOptions 定义执行kubeadm可组合工作流期间支持的选项
 type RunnerOptions struct {
-	// FilterPhases defines the list of phases to be executed (if empty, all).
+	// FilterPhases 定义要执行的阶段列表（如果为空, 则为全部）。
 	FilterPhases []string
 
-	// SkipPhases defines the list of phases to be excluded by execution (if empty, none).
+	// SkipPhases 定义要通过执行排除的阶段列表（如果为空, 则为无）。
 	SkipPhases []string
 }
 
-// RunData defines the data shared among all the phases included in the workflow, that is any type.
+// RunData 定义工作流中包括的所有阶段（即任何类型）之间共享的数据
 type RunData = interface{}
 
-// Runner implements management of composable kubeadm workflows.
+// Runner 实现可组合kubeadm工作流的管理
 type Runner struct {
-	// Options that regulate the runner behavior.
+	// Options 调节Runner的行为
 	Options RunnerOptions
 
-	// Phases composing the workflow to be managed by the runner.
+	// Phases 组成由Runner构成的Workflow
 	Phases []Phase
 
 	// runDataInitializer defines a function that creates the runtime data shared
@@ -100,7 +98,7 @@ type phaseRunner struct {
 	use string
 }
 
-// NewRunner return a new runner for composable kubeadm workflows.
+// NewRunner 返回可组合kubeadm工作流的新运行程序.
 func NewRunner() *Runner {
 	return &Runner{
 		Phases: []Phase{},
@@ -174,9 +172,8 @@ func (e *Runner) SetDataInitializer(builder func(cmd *cobra.Command, args []stri
 	e.runDataInitializer = builder
 }
 
-// InitData triggers the creation of runtime data shared among all the phases included in the workflow.
-// This action can be executed explicitly out, when it is necessary to get the RunData
-// before actually executing Run, or implicitly when invoking Run.
+// InitData 触发在工作流中包含的所有阶段之间共享运行时数据的创建
+// 当需要在实际执行Run之前获取RunData时，或者在调用Run时隐式执行此操作。
 func (e *Runner) InitData(args []string) (RunData, error) {
 	if e.runData == nil && e.runDataInitializer != nil {
 		var err error

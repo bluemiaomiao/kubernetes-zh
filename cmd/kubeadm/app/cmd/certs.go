@@ -90,7 +90,7 @@ var (
 `)
 )
 
-// newCmdCertsUtility returns main command for certs phase
+// newCmdCertsUtility 返回证书阶段的主命令
 func newCmdCertsUtility(out io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "certs",

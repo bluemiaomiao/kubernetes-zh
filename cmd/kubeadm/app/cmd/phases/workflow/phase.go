@@ -21,28 +21,26 @@ import (
 	"github.com/spf13/pflag"
 )
 
-// Phase provides an implementation of a workflow phase that allows
-// creation of new phases by simply instantiating a variable of this type.
+// Phase 提供一个工作流阶段的实现，该阶段允许通过简单地实例化此类型的变量来创建新阶段。
 type Phase struct {
-	// name of the phase.
-	// Phase name should be unique among peer phases (phases belonging to
-	// the same workflow or phases belonging to the same parent phase).
+	// 阶段的名称.
+	// 阶段的名称应该在属于同一个Workflow的阶段或者是属于同一个父阶段的阶段中拥有唯一的名称
 	Name string
 
-	// Aliases returns the aliases for the phase.
+	// 阶段的别名
 	Aliases []string
 
-	// Short description of the phase.
+	// 阶段的简短描述
 	Short string
 
-	// Long returns the long description of the phase.
+	// 阶段的详细描述
 	Long string
 
-	// Example returns the example for the phase.
+	// 阶段的示例用法
 	Example string
 
-	// Hidden define if the phase should be hidden in the workflow help.
-	// e.g. PrintFilesIfDryRunning phase in the kubeadm init workflow is candidate for being hidden to the users
+	// 用于定义是否在workflow中隐藏该阶段
+	// 比如: kubeadm init工作流中的 PrintFileSifDry 运行阶段可能会对用户隐藏
 	Hidden bool
 
 	// Phases defines a nested, ordered sequence of phases.

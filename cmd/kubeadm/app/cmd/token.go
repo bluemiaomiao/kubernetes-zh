@@ -56,7 +56,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// newCmdToken returns cobra.Command for token management
+// newCmdToken 返回 kubeadm token 命令
 func newCmdToken(out io.Writer, errW io.Writer) *cobra.Command {
 	var kubeConfigFile string
 	var dryRun bool

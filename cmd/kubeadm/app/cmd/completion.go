@@ -97,7 +97,7 @@ func GetSupportedShells() []string {
 	return shells
 }
 
-// newCmdCompletion returns the "kubeadm completion" command
+// newCmdCompletion 返回 "kubeadm completion" 命令
 func newCmdCompletion(out io.Writer, boilerPlate string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "completion SHELL",

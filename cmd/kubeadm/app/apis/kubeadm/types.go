@@ -84,7 +84,7 @@ type ClusterConfiguration struct {
 
 	// Networking holds configuration for the networking topology of the cluster.
 	Networking Networking
-	// KubernetesVersion is the target version of the control plane.
+	// KubernetesVersion 控制平面的目标版本.
 	KubernetesVersion string
 
 	// ControlPlaneEndpoint sets a stable IP address or DNS name for the control plane; it

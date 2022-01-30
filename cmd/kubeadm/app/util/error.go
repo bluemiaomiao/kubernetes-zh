@@ -27,11 +27,11 @@ import (
 )
 
 const (
-	// DefaultErrorExitCode defines exit the code for failed action generally
+	// DefaultErrorExitCode 定义失败操作的退出代码
 	DefaultErrorExitCode = 1
-	// PreFlightExitCode defines exit the code for preflight checks
+	// PreFlightExitCode 定义预检操作的退出代码
 	PreFlightExitCode = 2
-	// ValidationExitCode defines the exit code validation checks
+	// ValidationExitCode 定义退出代码验证检查
 	ValidationExitCode = 3
 )
 
@@ -48,11 +48,9 @@ func fatal(msg string, code int) {
 	os.Exit(code)
 }
 
-// CheckErr prints a user friendly error to STDERR and exits with a non-zero
-// exit code. Unrecognized errors will be printed with an "error: " prefix.
-//
-// This method is generic to the command in use and may be used by non-Kubectl
-// commands.
+// CheckErr 打印友好的错误码到标准输出, 并返回一个非零的退出码
+// 无法识别的错误将以"错误:"前缀打印。
+// 此方法是所用命令的通用方法，可由非kubectl命令使用
 func CheckErr(err error) {
 	checkErr(err, fatal)
 }
@@ -63,21 +61,19 @@ type preflightError interface {
 	Preflight() bool
 }
 
-// checkErr formats a given error as a string and calls the passed handleErr
-// func with that string and an exit code.
+// checkErr 将给定的错误格式化为字符串，并使用该字符串和退出代码调用传递的handleErr函数
 func checkErr(err error, handleErr func(string, int)) {
 
 	var msg string
 	if err != nil {
-		msg = fmt.Sprintf("%s\nTo see the stack trace of this error execute with --v=5 or higher", err.Error())
-		// check if the verbosity level in klog is high enough and print a stack trace.
+		msg = fmt.Sprintf("%s\n要查看此错误的堆栈跟踪，请使用--v=5或更高的值执行", err.Error())
+		// 检查klog中的详细级别是否足够高，并打印堆栈跟踪
 		f := flag.CommandLine.Lookup("v")
 		if f != nil {
-			// assume that the "v" flag contains a parseable Int32 as per klog's "Level" type alias,
-			// thus no error from ParseInt is handled here.
+			// 假设“v”标志包含符合klog "Level"类型别名的可解析Int32，因此这里不会处理来自ParseInt的错误
 			if v, e := strconv.ParseInt(f.Value.String(), 10, 32); e == nil {
 				// https://git.k8s.io/community/contributors/devel/sig-instrumentation/logging.md
-				// klog.V(5) - Trace level verbosity
+				// klog.V(5) - 跟踪级详细信息
 				if v > 4 {
 					msg = fmt.Sprintf("%+v", err)
 				}
