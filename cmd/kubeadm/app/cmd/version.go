@@ -30,7 +30,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Version provides the version information of kubeadm.
+// Version 提供kubeadm的版本信息
 type Version struct {
 	ClientVersion *apimachineryversion.Info `json:"clientVersion"`
 }
@@ -42,6 +42,7 @@ func newCmdVersion(out io.Writer) *cobra.Command {
 		Short: "打印kubeadm的版本信息",
 		Long:  "打印kubeadm相关的详细版本信息",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			fmt.Println("执行: cmd/kubeadm/app/cmd/version.go[newCmdVersion][RunE]")
 			return RunVersion(out, cmd)
 		},
 		Args: cobra.NoArgs,
@@ -50,40 +51,52 @@ func newCmdVersion(out io.Writer) *cobra.Command {
 	return cmd
 }
 
-// RunVersion provides the version information of kubeadm in format depending on arguments
-// specified in cobra.Command.
+// RunVersion 提供kubeadm的版本信息，格式取决于cobra.Command中指定的参数
 func RunVersion(out io.Writer, cmd *cobra.Command) error {
-	klog.V(1).Infoln("[version] retrieving version info")
+	fmt.Println("执行: cmd/kubeadm/app/cmd/version.go[newCmdVersion][RunVersion]")
+	klog.V(1).Infoln("[版本] 正在检索版本信息")
+	// 返回整个代码基版本, 它是用来检测二进制代码是用什么代码构建的。
 	clientVersion := version.Get()
 	v := Version{
 		ClientVersion: &clientVersion,
 	}
 
+	// TODO: !!!修复使用手动编译方式造成Shell脚本无法映射版本信息到Go文件致使kubeadm运行失败的问题
+	v.ClientVersion.Major = "1"
+	v.ClientVersion.Minor = "22"
+	v.ClientVersion.GitVersion = "v1.22.6"
+	v.ClientVersion.GitCommit = "f59f5c2fda36e4036b49ec027e556a15456108f0"
+	v.ClientVersion.GitTreeState = "clean"
+	v.ClientVersion.BuildDate = "2022-01-19T17:31:49Z"
+	v.ClientVersion.GoVersion = "go1.17"
+	v.ClientVersion.Compiler = "gc"
+	v.ClientVersion.Platform = "linux/amd64"
+
 	const flag = "output"
 	of, err := cmd.Flags().GetString(flag)
 	if err != nil {
-		return errors.Wrapf(err, "error accessing flag %s for command %s", flag, cmd.Name())
+		return errors.Wrapf(err, "访问标志时出错 %s 在执行 %s 时", flag, cmd.Name())
 	}
 
 	switch of {
 	case "":
-		fmt.Fprintf(out, "kubeadm version: %#v\n", v.ClientVersion)
+		_, _ = fmt.Fprintf(out, "kubeadm 版本: %#v\n", v.ClientVersion)
 	case "short":
-		fmt.Fprintf(out, "%s\n", v.ClientVersion.GitVersion)
+		_, _ = fmt.Fprintf(out, "%s\n", v.ClientVersion.GitVersion)
 	case "yaml":
 		y, err := yaml.Marshal(&v)
 		if err != nil {
 			return err
 		}
-		fmt.Fprintln(out, string(y))
+		_, _ = fmt.Fprintln(out, string(y))
 	case "json":
 		y, err := json.MarshalIndent(&v, "", "  ")
 		if err != nil {
 			return err
 		}
-		fmt.Fprintln(out, string(y))
+		_, _ = fmt.Fprintln(out, string(y))
 	default:
-		return errors.Errorf("invalid output format: %s", of)
+		return errors.Errorf("输出格式无效: %s", of)
 	}
 
 	return nil
