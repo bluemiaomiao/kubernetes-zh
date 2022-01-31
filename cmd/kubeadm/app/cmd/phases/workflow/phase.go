@@ -43,42 +43,36 @@ type Phase struct {
 	// 比如: kubeadm init工作流中的 PrintFileSifDry 运行阶段可能会对用户隐藏
 	Hidden bool
 
-	// Phases defines a nested, ordered sequence of phases.
+	// Phases 定义嵌套的、有序的阶段序列。
 	Phases []Phase
 
-	// RunAllSiblings allows to assign to a phase the responsibility to
-	// run all the sibling phases
-	// Nb. phase marked as RunAllSiblings can not have Run functions
+	// RunAllSiblings 允许将运行所有同级阶段的责任分配给某个阶段
+	// 注意: 标记为RunAllSides的阶段不能有运行函数
 	RunAllSiblings bool
 
-	// Run defines a function implementing the phase action.
-	// It is recommended to implent type assertion, e.g. using golang type switch,
-	// for validating the RunData type.
+	// Run 定义实现阶段操作的函数。
+	// 建议执行类型断言，例如使用golang type switch来验证RunData类型。
 	Run func(data RunData) error
 
-	// RunIf define a function that implements a condition that should be checked
-	// before executing the phase action.
-	// If this function return nil, the phase action is always executed.
+	// RunIf 定义一个函数，该函数实现在执行阶段操作之前应检查的条件。
+	// 如果此函数返回nil，则始终执行阶段操作。
 	RunIf func(data RunData) (bool, error)
 
-	// InheritFlags defines the list of flags that the cobra command generated for this phase should Inherit
-	// from local flags defined in the parent command / or additional flags defined in the phase runner.
+	// InheritFlags 定义为该阶段生成的cobra命令应从父命令中定义的本地标志或阶段Runner中定义的其他标志继承的标志列表。
 	// If the values is not set or empty, no flags will be assigned to the command
-	// Nb. global flags are automatically inherited by nested cobra command
+	// 注意: 全局标志由嵌套的cobra命令自动继承
 	InheritFlags []string
 
-	// LocalFlags defines the list of flags that should be assigned to the cobra command generated
-	// for this phase.
-	// Nb. if two or phases have the same local flags, please consider using local flags in the parent command
-	// or additional flags defined in the phase runner.
+	// LocalFlags 定义应分配给为该阶段生成的cobra命令的标志列表
+	// 注意: 如果两个或多个阶段具有相同的局部标志，请考虑使用父命令中的局部标志或在阶段Runner中定义的附加标志。
 	LocalFlags *pflag.FlagSet
 
-	// ArgsValidator defines the positional arg function to be used for validating args for this phase
-	// If not set a phase will adopt the args of the top level command.
+	// ArgsValidator 定义用于验证此阶段的参数的位置参数函数
+	// 如果没有设置，阶段将采用顶级命令的参数。
 	ArgsValidator cobra.PositionalArgs
 }
 
-// AppendPhase adds the given phase to the nested, ordered sequence of phases.
+// AppendPhase 将给定阶段添加到嵌套的有序阶段序列中。
 func (t *Phase) AppendPhase(phase Phase) {
 	t.Phases = append(t.Phases, phase)
 }

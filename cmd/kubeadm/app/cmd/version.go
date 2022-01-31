@@ -57,6 +57,7 @@ func RunVersion(out io.Writer, cmd *cobra.Command) error {
 	klog.V(1).Infoln("[版本] 正在检索版本信息")
 	// 返回整个代码基版本, 它是用来检测二进制代码是用什么代码构建的。
 	clientVersion := version.Get()
+
 	v := Version{
 		ClientVersion: &clientVersion,
 	}

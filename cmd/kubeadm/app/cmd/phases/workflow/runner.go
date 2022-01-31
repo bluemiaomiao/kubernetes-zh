@@ -151,9 +151,8 @@ func (e *Runner) computePhaseRunFlags() (map[string]bool, error) {
 	return phaseRunFlags, nil
 }
 
-// SetDataInitializer allows to setup a function that initialize the runtime data shared
-// among all the phases included in the workflow.
-// The method will receive in input the cmd that triggers the Runner (only if the runner is BindToCommand)
+// SetDataInitializer 允许设置初始化Workflow中所有阶段共享的运行时数据的函数。
+// 该方法将在输入中接收触发运行程序的cmd（仅当Runner是BindToCommand时）
 func (e *Runner) SetDataInitializer(builder func(cmd *cobra.Command, args []string) (RunData, error)) {
 	e.runDataInitializer = builder
 }
@@ -171,40 +170,39 @@ func (e *Runner) InitData(args []string) (RunData, error) {
 	return e.runData, nil
 }
 
-// Run the kubeadm composable kubeadm workflows.
+// Run kubeadm可组合的kubeadm Workflow。
 func (e *Runner) Run(args []string) error {
 	e.prepareForExecution()
 
-	// determine which phase should be run according to RunnerOptions
+	// 根据RunnerOptions确定应该运行哪个阶段
 	phaseRunFlags, err := e.computePhaseRunFlags()
 	if err != nil {
 		return err
 	}
 
-	// builds the runner data
+	// 构建Runner数据
 	var data RunData
 	if data, err = e.InitData(args); err != nil {
 		return err
 	}
 
 	err = e.visitAll(func(p *phaseRunner) error {
-		// if the phase should not be run, skip the phase.
+		// 如果不应运行该阶段，请跳过该阶段。
 		if run, ok := phaseRunFlags[p.generatedName]; !run || !ok {
 			return nil
 		}
 
-		// Errors if phases that are meant to create special subcommands only
-		// are wrongly assigned Run Methods
+		// 如果仅用于创建特殊子命令的阶段被错误地分配了运行方法，则会出现错误
 		if p.RunAllSiblings && (p.RunIf != nil || p.Run != nil) {
-			return errors.Errorf("phase marked as RunAllSiblings can not have Run functions %s", p.generatedName)
+			return errors.Errorf("标记为RunAllSides的阶段不能有运行函数 %s", p.generatedName)
 		}
 
-		// If the phase defines a condition to be checked before executing the phase action.
+		// 如果阶段定义了在执行阶段操作之前要检查的条件。
 		if p.RunIf != nil {
 			// Check the condition and returns if the condition isn't satisfied (or fails)
 			ok, err := p.RunIf(data)
 			if err != nil {
-				return errors.Wrapf(err, "error execution run condition for phase %s", p.generatedName)
+				return errors.Wrapf(err, "阶段的错误执行运行条件 %s", p.generatedName)
 			}
 
 			if !ok {
@@ -212,10 +210,10 @@ func (e *Runner) Run(args []string) error {
 			}
 		}
 
-		// Runs the phase action (if defined)
+		// 运行阶段操作（如果已定义）
 		if p.Run != nil {
 			if err := p.Run(data); err != nil {
-				return errors.Wrapf(err, "error execution phase %s", p.generatedName)
+				return errors.Wrapf(err, "错误执行阶段 %s", p.generatedName)
 			}
 		}
 
@@ -225,13 +223,13 @@ func (e *Runner) Run(args []string) error {
 	return err
 }
 
-// Help returns text with the list of phases included in the workflow.
+// Help 返回包含Workflow中包含的阶段列表的文本。
 func (e *Runner) Help(cmdUse string) string {
 	e.prepareForExecution()
 
-	// computes the max length of for each phase use line
+	// 计算每个阶段使用行的最大长度
 	maxLength := 0
-	e.visitAll(func(p *phaseRunner) error {
+	_ = e.visitAll(func(p *phaseRunner) error {
 		if !p.Hidden && !p.RunAllSiblings {
 			length := len(p.use)
 			if maxLength < length {
@@ -241,77 +239,83 @@ func (e *Runner) Help(cmdUse string) string {
 		return nil
 	})
 
-	// prints the list of phases indented by level and formatted using the maxlength
-	// the list is enclosed in a mardown code block for ensuring better readability in the public web site
-	line := fmt.Sprintf("The %q command executes the following phases:\n", cmdUse)
+	// 打印按级别缩进并使用maxlength设置格式的阶段列表
+	// 该列表包含在一个Markdown代码块中，以确保公共网站具有更好的可读性
+	line := fmt.Sprintf("%q 命令执行以下阶段:\n", cmdUse)
+
+	// 拼接Markdown文本
 	line += "```\n"
 	offset := 2
-	e.visitAll(func(p *phaseRunner) error {
+	_ = e.visitAll(func(p *phaseRunner) error {
 		if !p.Hidden && !p.RunAllSiblings {
 			padding := maxLength - len(p.use) + offset
-			line += strings.Repeat(" ", offset*p.level) // indentation
-			line += p.use                               // name + aliases
-			line += strings.Repeat(" ", padding)        // padding right up to max length (+ offset for spacing)
-			line += p.Short                             // phase short description
+			// 缩进
+			line += strings.Repeat(" ", offset*p.level)
+			// 名称+别名
+			line += p.use
+			// 填充至最大长度（+间距偏移）
+			line += strings.Repeat(" ", padding)
+			// 阶段简短描述
+			line += p.Short
 			line += "\n"
 		}
 
 		return nil
 	})
 	line += "```"
+	// End:拼接Markdown文本
+
 	return line
 }
 
-// SetAdditionalFlags allows to define flags to be added
-// to the subcommands generated for each phase (but not existing in the parent command).
-// Please note that this command needs to be done before BindToCommand.
-// Nb. if a flag is used only by one phase, please consider using phase LocalFlags.
+// SetAdditionalFlags 允许定义要添加的标志到为每个阶段生成的子命令（但不存在于父命令中）。
+// 请注意，这个命令需要在BindToCommand之前完成。
+// 注意: 如果只有一个阶段使用标志，请考虑使用阶段LoopFLAGS
 func (e *Runner) SetAdditionalFlags(fn func(*pflag.FlagSet)) {
-	// creates a new NewFlagSet
+	// 创建一个新的NewFlagSet
 	e.cmdAdditionalFlags = pflag.NewFlagSet("phaseAdditionalFlags", pflag.ContinueOnError)
-	// invokes the function that sets additional flags
+	// 调用设置附加标志的函数
 	fn(e.cmdAdditionalFlags)
 }
 
-// BindToCommand bind the Runner to a cobra command by altering
-// command help, adding phase related flags and by adding phases subcommands
-// Please note that this command needs to be done once all the phases are added to the Runner.
+// BindToCommand 通过更改命令帮助、添加阶段相关标志和添加阶段子命令，将Runner绑定到cobra命令
+// 请注意，一旦所有阶段都添加到Runner中，就需要执行此命令。
 func (e *Runner) BindToCommand(cmd *cobra.Command) {
-	// keep track of the command triggering the runner
+	// 跟踪触发Runner的命令
 	e.runCmd = cmd
 
-	// return early if no phases were added
+	// 如果没有添加阶段，请提前返回
 	if len(e.Phases) == 0 {
 		return
 	}
 
 	e.prepareForExecution()
 
-	// adds the phases subcommand
+	// 添加阶段的子命令
 	phaseCommand := &cobra.Command{
 		Use:   "phase",
-		Short: fmt.Sprintf("Use this command to invoke single phase of the %s workflow", cmd.Name()),
+		Short: fmt.Sprintf("使用此命令可以调用 %s 工作流", cmd.Name()),
 	}
 
 	cmd.AddCommand(phaseCommand)
 
-	// generate all the nested subcommands for invoking single phases
+	// 生成用于调用单个阶段的所有嵌套子命令
 	subcommands := map[string]*cobra.Command{}
-	e.visitAll(func(p *phaseRunner) error {
-		// skip hidden phases
+	_ = e.visitAll(func(p *phaseRunner) error {
+		// 跳过隐藏阶段
 		if p.Hidden {
 			return nil
 		}
 
-		// initialize phase selector
+		// 初始化阶段选择器
 		phaseSelector := p.generatedName
 
-		// if requested, set the phase to run all the sibling phases
+		// 如果请求，将阶段设置为运行所有同级阶段
 		if p.RunAllSiblings {
 			phaseSelector = p.parent.generatedName
 		}
 
-		// creates phase subcommand
+		// 创建阶段的子命令
 		phaseCmd := &cobra.Command{
 			Use:     strings.ToLower(p.Name),
 			Short:   p.Short,
@@ -319,35 +323,35 @@ func (e *Runner) BindToCommand(cmd *cobra.Command) {
 			Example: p.Example,
 			Aliases: p.Aliases,
 			RunE: func(cmd *cobra.Command, args []string) error {
-				// if the phase has subphases, print the help and exits
+				// 如果阶段有子阶段，请打印帮助并退出
 				if len(p.Phases) > 0 {
 					return cmd.Help()
 				}
 
-				// overrides the command triggering the Runner using the phaseCmd
+				// 使用phaseCmd覆盖触发运行程序的命令
 				e.runCmd = cmd
 				e.Options.FilterPhases = []string{phaseSelector}
 				return e.Run(args)
 			},
 		}
 
-		// makes the new command inherits local flags from the parent command
-		// Nb. global flags will be inherited automatically
+		// 使新命令从父命令继承本地标志
+		// 注意: 全局标志将自动继承
 		inheritsFlags(cmd.Flags(), phaseCmd.Flags(), p.InheritFlags)
 
-		// makes the new command inherits additional flags for phases
+		// 使新命令继承阶段的其他标志
 		if e.cmdAdditionalFlags != nil {
 			inheritsFlags(e.cmdAdditionalFlags, phaseCmd.Flags(), p.InheritFlags)
 		}
 
-		// If defined, added phase local flags
+		// 如果已定义，则添加阶段本地标志
 		if p.LocalFlags != nil {
 			p.LocalFlags.VisitAll(func(f *pflag.Flag) {
 				phaseCmd.Flags().AddFlag(f)
 			})
 		}
 
-		// if this phase has children (not a leaf) it doesn't accept any args
+		// 如果这个阶段有子对象（不是一个叶子节点），它不接受任何参数
 		if len(p.Phases) > 0 {
 			phaseCmd.Args = cobra.NoArgs
 		} else {
@@ -358,7 +362,7 @@ func (e *Runner) BindToCommand(cmd *cobra.Command) {
 			}
 		}
 
-		// adds the command to parent
+		// 将命令添加到父级
 		if p.level == 0 {
 			phaseCommand.AddCommand(phaseCmd)
 		} else {
@@ -369,24 +373,24 @@ func (e *Runner) BindToCommand(cmd *cobra.Command) {
 		return nil
 	})
 
-	// alters the command description to show available phases
+	// 更改命令描述以显示可用阶段
 	if cmd.Long != "" {
 		cmd.Long = fmt.Sprintf("%s\n\n%s\n", cmd.Long, e.Help(cmd.Use))
 	} else {
 		cmd.Long = fmt.Sprintf("%s\n\n%s\n", cmd.Short, e.Help(cmd.Use))
 	}
 
-	// adds phase related flags to the main command
-	cmd.Flags().StringSliceVar(&e.Options.SkipPhases, "skip-phases", nil, "List of phases to be skipped")
+	// 向主命令添加与阶段相关的标志
+	cmd.Flags().StringSliceVar(&e.Options.SkipPhases, "skip-phases", nil, "要跳过的阶段列表")
 }
 
 func inheritsFlags(sourceFlags, targetFlags *pflag.FlagSet, cmdFlags []string) {
-	// If the list of flag to be inherited from the parent command is not defined, no flag is added
+	// 如果未定义要从父命令继承的标志列表，则不会添加任何标志
 	if cmdFlags == nil {
 		return
 	}
 
-	// add all the flags to be inherited to the target flagSet
+	// 将要继承的所有标志添加到目标标志集
 	sourceFlags.VisitAll(func(f *pflag.Flag) {
 		for _, c := range cmdFlags {
 			if f.Name == c {
@@ -396,8 +400,7 @@ func inheritsFlags(sourceFlags, targetFlags *pflag.FlagSet, cmdFlags []string) {
 	})
 }
 
-// visitAll provides a utility method for visiting all the phases in the workflow
-// in the execution order and executing a func on each phase.
+// visitAll 提供一种实用方法，用于按执行顺序访问Workflow中的所有阶段，并在每个阶段上执行传入的函数。
 // Nested phase are visited immediately after their parent phase.
 func (e *Runner) visitAll(fn func(*phaseRunner) error) error {
 	for _, currentRunner := range e.phaseRunners {
@@ -408,24 +411,24 @@ func (e *Runner) visitAll(fn func(*phaseRunner) error) error {
 	return nil
 }
 
-// prepareForExecution initialize the internal state of the Runner (the list of phaseRunner).
+// prepareForExecution 初始化Runner的内部状态（phaseRunner列表）。
 func (e *Runner) prepareForExecution() {
 	e.phaseRunners = []*phaseRunner{}
 	var parentRunner *phaseRunner
 	for _, phase := range e.Phases {
-		// skips phases that are meant to create special subcommands only
+		// 跳过仅用于创建特殊子命令的阶段
 		if phase.RunAllSiblings {
 			continue
 		}
 
-		// add phases to the execution list
+		// 将阶段添加到执行列表中
 		addPhaseRunner(e, parentRunner, phase)
 	}
 }
 
-// addPhaseRunner adds the phaseRunner for a given phase to the phaseRunners list
+// addPhaseRunner 将给定阶段的phaseRunner添加到phaseRunner列表中
 func addPhaseRunner(e *Runner, parentRunner *phaseRunner, phase Phase) {
-	// computes contextual information derived by the workflow managed by the Runner.
+	// 计算由Runner管理的Workflow派生的上下文信息。
 	use := cleanName(phase.Name)
 	generatedName := use
 	selfPath := []string{generatedName}
@@ -436,7 +439,7 @@ func addPhaseRunner(e *Runner, parentRunner *phaseRunner, phase Phase) {
 		selfPath = append(parentRunner.selfPath, selfPath...)
 	}
 
-	// creates the phaseRunner
+	// 创建phaseRunner
 	currentRunner := &phaseRunner{
 		Phase:         phase,
 		parent:        parentRunner,
@@ -446,18 +449,16 @@ func addPhaseRunner(e *Runner, parentRunner *phaseRunner, phase Phase) {
 		use:           use,
 	}
 
-	// adds to the phaseRunners list
+	// 添加到phaseRunners列表中
 	e.phaseRunners = append(e.phaseRunners, currentRunner)
 
-	// iterate for the nested, ordered list of phases, thus storing
-	// phases in the expected executing order (child phase are stored immediately after their parent phase).
+	// 迭代嵌套、有序的阶段列表，从而以预期的执行顺序存储阶段（子阶段存储在其父阶段之后）。
 	for _, childPhase := range phase.Phases {
 		addPhaseRunner(e, currentRunner, childPhase)
 	}
 }
 
-// cleanName makes phase name suitable for the runner help, by lowercasing the name
-// and removing args descriptors, if any
+// cleanName 通过将名称小写并删除args描述符（如果有），使阶段名称适合runner帮助
 func cleanName(name string) string {
 	ret := strings.ToLower(name)
 	if pos := strings.Index(ret, " "); pos != -1 {
