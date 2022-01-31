@@ -19,19 +19,18 @@ func Run() error {
 	pflag.CommandLine.SetNormalizeFunc(cliflag.WordSepNormalizeFunc)
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 
-	pflag.Set("logtostderr", "true")
+	_ = pflag.Set("logtostderr", "true")
 	// 我们不希望这些标志出现在--help中
 	// 这些MarkHidden调用必须位于上述行之后
-	pflag.CommandLine.MarkHidden("version")
-	pflag.CommandLine.MarkHidden("log-flush-frequency")
-	pflag.CommandLine.MarkHidden("alsologtostderr")
-	pflag.CommandLine.MarkHidden("log-backtrace-at")
-	pflag.CommandLine.MarkHidden("log-dir")
-	pflag.CommandLine.MarkHidden("logtostderr")
-	pflag.CommandLine.MarkHidden("stderrthreshold")
-	pflag.CommandLine.MarkHidden("vmodule")
+	_ = pflag.CommandLine.MarkHidden("version")
+	_ = pflag.CommandLine.MarkHidden("log-flush-frequency")
+	_ = pflag.CommandLine.MarkHidden("alsologtostderr")
+	_ = pflag.CommandLine.MarkHidden("log-backtrace-at")
+	_ = pflag.CommandLine.MarkHidden("log-dir")
+	_ = pflag.CommandLine.MarkHidden("logtostderr")
+	_ = pflag.CommandLine.MarkHidden("stderrthreshold")
+	_ = pflag.CommandLine.MarkHidden("vmodule")
 
 	fmt.Println("执行: cmd/kubeadm/app/kubeadm.go[Run][NewKubeadmCommand]")
-	cmd := cmd.NewKubeadmCommand(os.Stdin, os.Stdout, os.Stderr)
-	return cmd.Execute()
+	return cmd.NewKubeadmCommand(os.Stdin, os.Stdout, os.Stderr).Execute()
 }

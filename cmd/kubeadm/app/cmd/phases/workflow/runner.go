@@ -48,53 +48,42 @@ type Runner struct {
 	// Phases 组成由Runner构成的Workflow
 	Phases []Phase
 
-	// runDataInitializer defines a function that creates the runtime data shared
-	// among all the phases included in the workflow
+	// runDataInitializer 在Workflow中包含的所有阶段中创建共享运行时数据
 	runDataInitializer func(*cobra.Command, []string) (RunData, error)
 
-	// runData is part of the internal state of the runner and it is used for implementing
-	// a singleton in the InitData methods (thus avoiding to initialize data
-	// more than one time)
+	// runData 是Runner内部状态的一部分, 用于在InitData方法中实现单例(从而避免多次初始化数据)
 	runData RunData
 
-	// runCmd is part of the internal state of the runner and it is used to track the
-	// command that will trigger the runner (only if the runner is BindToCommand).
+	// runCmd 是Runner内部状态的一部分, 用于跟踪触发Runner的命令(仅当Runner为BindToCommand时)
 	runCmd *cobra.Command
 
-	// cmdAdditionalFlags holds additional, shared flags that could be added to the subcommands generated
-	// for phases. Flags could be inherited from the parent command too or added directly to each phase
+	// cmdAdditionalFlags包含可以添加到为阶段生成的子命令中的其他共享标志。标志也可以从父命令继承，或直接添加到每个阶段
 	cmdAdditionalFlags *pflag.FlagSet
 
-	// phaseRunners is part of the internal state of the runner and provides
-	// a list of wrappers to phases composing the workflow with contextual
-	// information supporting phase execution.
+	// phaseRunners是Runner内部状态的一部分，它为组成Workflow的阶段提供一个包装列表，其中包含支持阶段执行的上下文信息。
 	phaseRunners []*phaseRunner
 }
 
-// phaseRunner provides a wrapper to a Phase with the addition of a set
-// of contextual information derived by the workflow managed by the Runner.
-// TODO: If we ever decide to get more sophisticated we can swap this type with a well defined dag or tree library.
+// phaseRunner 为一个阶段提供了一个包装器，添加了一组由Runner管理的Workflow派生的上下文信息。
+// TODO: 如果我们决定变得更复杂，我们可以用定义良好的DAG或Tree库替换这种类型。
 type phaseRunner struct {
-	// Phase provide access to the phase implementation
+	// 阶段提供对阶段实施的访问
 	Phase
 
-	// provide access to the parent phase in the workflow managed by the Runner.
+	// 提供对Runner管理的Workflow中父阶段的访问。
 	parent *phaseRunner
 
-	// level define the level of nesting of this phase into the workflow managed by
-	// the Runner.
+	// 级别定义将此阶段嵌套到Runner管理的Workflow中的级别。
 	level int
 
-	// selfPath contains all the elements of the path that identify the phase into
-	// the workflow managed by the Runner.
+	// selfPath包含路径的所有元素，这些元素标识了Runner管理的工作流的阶段。
 	selfPath []string
 
-	// generatedName is the full name of the phase, that corresponds to the absolute
-	// path of the phase in the workflow managed by the Runner.
+	// generatedName是阶段的全名，对应于Runner管理的工作流中阶段的绝对路径。
 	generatedName string
 
-	// use is the phase usage string that will be printed in the workflow help.
-	// It corresponds to the relative path of the phase in the workflow managed by the Runner.
+	// use 是将在Workflow帮助中打印的阶段用法字符串。
+	// 它对应于Runner管理的工作流中阶段的相对路径。
 	use string
 }
 
@@ -105,26 +94,25 @@ func NewRunner() *Runner {
 	}
 }
 
-// AppendPhase adds the given phase to the ordered sequence of phases managed by the runner.
+// AppendPhase 将给定阶段添加到Runner管理的有序阶段序列中。
 func (e *Runner) AppendPhase(t Phase) {
 	e.Phases = append(e.Phases, t)
 }
 
-// computePhaseRunFlags return a map defining which phase should be run and which not.
-// PhaseRunFlags are computed according to RunnerOptions.
+// computePhaseRunFlags 返回一个映射，定义应该运行哪个阶段，不应该运行哪个阶段。
+// PhaseRunFlags 根据RunnerOptions计算。
 func (e *Runner) computePhaseRunFlags() (map[string]bool, error) {
-	// Initialize support data structure
+	// 初始化支持数据结构
 	phaseRunFlags := map[string]bool{}
 	phaseHierarchy := map[string][]string{}
-	e.visitAll(func(p *phaseRunner) error {
-		// Initialize phaseRunFlags assuming that all the phases should be run.
+	_ = e.visitAll(func(p *phaseRunner) error {
+		// 假设所有阶段都应该运行，初始化phaseRunFlags。
 		phaseRunFlags[p.generatedName] = true
 
-		// Initialize phaseHierarchy for the current phase (the list of phases
-		// depending on the current phase
+		// 为当前的阶段初始化 phaseHierarchy (取决于当前阶段的阶段列表)
 		phaseHierarchy[p.generatedName] = []string{}
 
-		// Register current phase as part of its own parent hierarchy
+		// 将当前阶段注册为其自身父层次结构的一部分
 		parent := p.parent
 		for parent != nil {
 			phaseHierarchy[parent.generatedName] = append(phaseHierarchy[parent.generatedName], p.generatedName)
@@ -133,15 +121,14 @@ func (e *Runner) computePhaseRunFlags() (map[string]bool, error) {
 		return nil
 	})
 
-	// If a filter option is specified, set all phaseRunFlags to false except for
-	// the phases included in the filter and their hierarchy of nested phases.
+	// 如果指定了过滤器选项，则将所有phaseRunFlags设置为false，但过滤器中包含的阶段及其嵌套阶段的层次结构除外。
 	if len(e.Options.FilterPhases) > 0 {
 		for i := range phaseRunFlags {
 			phaseRunFlags[i] = false
 		}
 		for _, f := range e.Options.FilterPhases {
 			if _, ok := phaseRunFlags[f]; !ok {
-				return phaseRunFlags, errors.Errorf("invalid phase name: %s", f)
+				return phaseRunFlags, errors.Errorf("无效的阶段名称: %s", f)
 			}
 			phaseRunFlags[f] = true
 			for _, c := range phaseHierarchy[f] {
@@ -150,11 +137,10 @@ func (e *Runner) computePhaseRunFlags() (map[string]bool, error) {
 		}
 	}
 
-	// If a phase skip option is specified, set the corresponding phaseRunFlags
-	// to false and apply the same change to the underlying hierarchy
+	// 如果指定了“阶段跳过”选项，请将相应的phaseRunFlags设置为false，并对基础层次结构应用相同的更改
 	for _, f := range e.Options.SkipPhases {
 		if _, ok := phaseRunFlags[f]; !ok {
-			return phaseRunFlags, errors.Errorf("invalid phase name: %s", f)
+			return phaseRunFlags, errors.Errorf("无效的阶段名称: %s", f)
 		}
 		phaseRunFlags[f] = false
 		for _, c := range phaseHierarchy[f] {
