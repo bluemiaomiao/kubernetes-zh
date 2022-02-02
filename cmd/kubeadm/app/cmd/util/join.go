@@ -31,6 +31,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// join命令的字符串模板, 可以被填充解析为字符串
 var joinCommandTemplate = template.Must(template.New("join").Parse(`` +
 	`kubeadm join {{.ControlPlaneHostPort}} --token {{.Token}} \
 	{{range $h := .CAPubKeyPins}}--discovery-token-ca-cert-hash {{$h}} {{end}}{{if .ControlPlane}}\
@@ -43,42 +44,42 @@ func GetJoinWorkerCommand(kubeConfigFile, token string, skipTokenPrint bool) (st
 	return getJoinCommand(kubeConfigFile, token, "", false, skipTokenPrint, false)
 }
 
-// GetJoinControlPlaneCommand returns the kubeadm join command for a given token and
-// and Kubernetes cluster (the current cluster in the kubeconfig file)
+// GetJoinControlPlaneCommand 返回给定令牌和Kubernetes集群（kubeconfig文件中的当前集群）的kubeadm join命令
 func GetJoinControlPlaneCommand(kubeConfigFile, token, key string, skipTokenPrint, skipCertificateKeyPrint bool) (string, error) {
 	return getJoinCommand(kubeConfigFile, token, key, true, skipTokenPrint, skipCertificateKeyPrint)
 }
 
 func getJoinCommand(kubeConfigFile, token, key string, controlPlane, skipTokenPrint, skipCertificateKeyPrint bool) (string, error) {
-	// load the kubeconfig file to get the CA certificate and endpoint
+	// 加载kubeconfig文件以获取CA证书和端点
 	config, err := clientcmd.LoadFromFile(kubeConfigFile)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to load kubeconfig")
+		return "", errors.Wrap(err, "未能加载kubeconfig")
 	}
 
-	// load the default cluster config
+	// 加载默认的集群配置
 	clusterConfig := kubeconfigutil.GetClusterFromKubeConfig(config)
 	if clusterConfig == nil {
-		return "", errors.New("failed to get default cluster config")
+		return "", errors.New("无法获取默认群集配置")
 	}
 
-	// load CA certificates from the kubeconfig (either from PEM data or by file path)
+	// 从kubeconfig加载CA证书（从PEM数据或通过文件路径）
+	// x509是Golang的内建库
 	var caCerts []*x509.Certificate
 	if clusterConfig.CertificateAuthorityData != nil {
 		caCerts, err = clientcertutil.ParseCertsPEM(clusterConfig.CertificateAuthorityData)
 		if err != nil {
-			return "", errors.Wrap(err, "failed to parse CA certificate from kubeconfig")
+			return "", errors.Wrap(err, "无法从kubeconfig解析CA证书")
 		}
 	} else if clusterConfig.CertificateAuthority != "" {
 		caCerts, err = clientcertutil.CertsFromFile(clusterConfig.CertificateAuthority)
 		if err != nil {
-			return "", errors.Wrap(err, "failed to load CA certificate referenced by kubeconfig")
+			return "", errors.Wrap(err, "无法加载kubeconfig引用的CA证书")
 		}
 	} else {
-		return "", errors.New("no CA certificates found in kubeconfig")
+		return "", errors.New("在kubeconfig中未找到CA证书")
 	}
 
-	// hash all the CA certs and include their public key pins as trusted values
+	// 散列所有CA证书，并将其公钥PIN作为可信值包含在内
 	publicKeyPins := make([]string, 0, len(caCerts))
 	for _, caCert := range caCerts {
 		publicKeyPins = append(publicKeyPins, pubkeypin.Hash(caCert))
@@ -102,7 +103,7 @@ func getJoinCommand(kubeConfigFile, token, key string, controlPlane, skipTokenPr
 	var out bytes.Buffer
 	err = joinCommandTemplate.Execute(&out, ctx)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to render join command template")
+		return "", errors.Wrap(err, "无法渲染join命令模板")
 	}
 	return out.String(), nil
 }

@@ -35,6 +35,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// 定义了默认的运行参数
 const (
 	// KubernetesDir is the directory Kubernetes owns for storing various configuration files
 	KubernetesDir = "/etc/kubernetes"
@@ -142,7 +143,7 @@ const (
 	// FrontProxyClientCertCommonName defines front proxy certificate common name
 	FrontProxyClientCertCommonName = "front-proxy-client" //used as subject.commonname attribute (CN)
 
-	// AdminKubeConfigFileName defines name for the kubeconfig aimed to be used by the superuser/admin of the cluster
+	// AdminKubeConfigFileName 定义群集超级用户/管理员要使用的kubeconfig的名称
 	AdminKubeConfigFileName = "admin.conf"
 	// KubeletBootstrapKubeConfigFileName defines the file name for the kubeconfig that the kubelet will use to do
 	// the TLS bootstrap to get itself an unique credential

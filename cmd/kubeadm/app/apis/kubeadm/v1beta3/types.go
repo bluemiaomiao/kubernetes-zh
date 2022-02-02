@@ -24,14 +24,14 @@ import (
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// InitConfiguration contains a list of elements that is specific "kubeadm init"-only runtime
+// InitConfiguration 包含特定于“kubeadm init”的元素列表（仅限运行时信息）
 // information.
 type InitConfiguration struct {
 	metav1.TypeMeta `json:",inline"`
 
-	// `kubeadm init`-only information. These fields are solely used the first time `kubeadm init` runs.
-	// After that, the information in the fields IS NOT uploaded to the `kubeadm-config` ConfigMap
-	// that is used by `kubeadm upgrade` for instance. These fields must be omitempty.
+	// 只有kubeadm init命令才能用的信息。这些字段仅在第一次运行“kubeadm init”时使用。
+	// 在此之后，字段中的信息不会被上传到kubeadm-config的ConfigMap中，例如kubeadm upgrade所使用的ConfigMap。
+	// 这些字段必须为空。
 
 	// BootstrapTokens is respected at `kubeadm init` time and describes a set of Bootstrap Tokens to create.
 	// This information IS NOT uploaded to the kubeadm cluster configmap, partly because of its sensitive nature

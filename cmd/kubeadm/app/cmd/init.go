@@ -72,9 +72,8 @@ var (
 		`)))
 )
 
-// initOptions defines all the init options exposed via flags by kubeadm init.
-// Please note that this structure includes the public kubeadm config API, but only a subset of the options
-// supported by this api will be exposed as a flag.
+// initOptions 定义kubeadm init通过标志公开的所有init选项。
+// 请注意，此结构包括公共kubeadm config API，但此API支持的选项中只有一个子集将作为标志公开。
 type initOptions struct {
 	cfgPath                 string
 	skipTokenPrint          bool
@@ -91,11 +90,11 @@ type initOptions struct {
 	patchesDir              string
 }
 
-// compile-time assert that the local data object satisfies the phases data interface.
+// 编译时断言本地数据对象满足阶段数据接口。
 var _ phases.InitData = &initData{}
 
-// initData defines all the runtime information used when running the kubeadm init workflow;
-// this data is shared across all the phases that are included in the workflow.
+// initData 定义运行kubeadm init Workflow时使用的所有运行时信息；
+// 此数据在Workflow中包含的所有阶段中共享。
 type initData struct {
 	cfg                     *kubeadmapi.InitConfiguration
 	skipTokenPrint          bool
@@ -132,6 +131,9 @@ func newCmdInit(out io.Writer, initOptions *initOptions) *cobra.Command {
 		// Run函数与RunE函数都是运行命令的功能函数, 但是当功能执行错误之后, Run需要手动调用cmd.Help(), RunE函数会自动调用
 		// 并且如果Run与RunE同时在cobra.Command结构体对象中实现, 那么RunE函数的调用优先级高于Run函数
 		RunE: func(cmd *cobra.Command, args []string) error {
+			fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][RunE]")
+
+			// 通过传入的命令行选项初始化initRunner的initData结构体
 			c, err := initRunner.InitData(args)
 			if err != nil {
 				return err
@@ -491,7 +493,7 @@ func (d *initData) KubeConfigDir() string {
 	return d.kubeconfigDir
 }
 
-// KubeConfigPath returns the path to the kubeconfig file to use for connecting to Kubernetes
+// KubeConfigPath 返回用于连接Kubernetes的kubeconfig文件的路径
 func (d *initData) KubeConfigPath() string {
 	if d.dryRun {
 		d.kubeconfigPath = filepath.Join(d.dryRunDir, kubeadmconstants.AdminKubeConfigFileName)
@@ -550,7 +552,7 @@ func (d *initData) Client() (clientset.Interface, error) {
 	return d.client, nil
 }
 
-// Tokens returns an array of token strings.
+// Tokens 返回一个令牌字符串数组。
 func (d *initData) Tokens() []string {
 	tokens := []string{}
 	for _, bt := range d.cfg.BootstrapTokens {

@@ -103,12 +103,16 @@ func WriteToDisk(filename string, kubeconfig *clientcmdapi.Config) error {
 	return nil
 }
 
-// GetClusterFromKubeConfig returns the default Cluster of the specified KubeConfig
+// GetClusterFromKubeConfig 返回指定KubeConfig的默认群集
 func GetClusterFromKubeConfig(config *clientcmdapi.Config) *clientcmdapi.Cluster {
-	// If there is an unnamed cluster object, use it
+	// 如果存在未命名的群集对象，请使用它
+	// config.Clusters是指向群集配置的可引用名称的Map
 	if config.Clusters[""] != nil {
 		return config.Clusters[""]
 	}
+
+	// config.Contexts是可引用名称到上下文配置的Map
+	// config.CurrentContext默认情况下要使用的上下文的名称
 	if config.Contexts[config.CurrentContext] != nil {
 		return config.Clusters[config.Contexts[config.CurrentContext].Cluster]
 	}

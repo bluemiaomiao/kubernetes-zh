@@ -157,11 +157,14 @@ func (e *Runner) SetDataInitializer(builder func(cmd *cobra.Command, args []stri
 	e.runDataInitializer = builder
 }
 
-// InitData 触发在工作流中包含的所有阶段之间共享运行时数据的创建
+// InitData 触发在Workflow中包含的所有阶段之间共享运行时数据的创建
 // 当需要在实际执行Run之前获取RunData时，或者在调用Run时隐式执行此操作。
 func (e *Runner) InitData(args []string) (RunData, error) {
+	// 确保runData是空的并且runData的初始化器已经创建成功
 	if e.runData == nil && e.runDataInitializer != nil {
 		var err error
+		// 执行runData的初始化操作
+		// 本质是传入用户定义的命令行参数并且执行创建Runner对象是挂载的func(*cobra.Command, []string) (RunData, error)函数
 		if e.runData, err = e.runDataInitializer(e.runCmd, args); err != nil {
 			return nil, err
 		}
