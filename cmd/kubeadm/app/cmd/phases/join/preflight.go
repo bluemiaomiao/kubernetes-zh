@@ -53,7 +53,7 @@ var (
 		`)))
 )
 
-// NewPreflightPhase creates a kubeadm workflow phase that implements preflight checks for a new node join
+// NewPreflightPhase 创建kubeadm工作流阶段，实现新节点连接的预检检查
 func NewPreflightPhase() workflow.Phase {
 	return workflow.Phase{
 		Name:    "preflight [api-server-endpoint]",

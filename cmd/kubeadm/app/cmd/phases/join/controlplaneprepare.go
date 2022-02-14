@@ -41,7 +41,7 @@ var controlPlanePrepareExample = cmdutil.Examples(`
 	kubeadm join phase control-plane-prepare all
 `)
 
-// NewControlPlanePreparePhase creates a kubeadm workflow phase that implements the preparation of the node to serve a control plane
+// NewControlPlanePreparePhase 创建一个kubeadm工作流阶段，实现为控制平面服务的节点准备
 func NewControlPlanePreparePhase() workflow.Phase {
 	return workflow.Phase{
 		Name:    "control-plane-prepare",

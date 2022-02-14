@@ -25,8 +25,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// NewCheckEtcdPhase is a hidden phase that runs after the control-plane-prepare and
-// before the bootstrap-kubelet phase that ensures etcd is healthy
+// NewCheckEtcdPhase 是一个隐藏阶段，在控制平面准备阶段之后，引导库删除阶段之前运行，确保etcd是健康的
 func NewCheckEtcdPhase() workflow.Phase {
 	return workflow.Phase{
 		Name:   "check-etcd",
@@ -41,7 +40,7 @@ func runCheckEtcdPhase(c workflow.RunData) error {
 		return errors.New("check-etcd phase invoked with an invalid data struct")
 	}
 
-	// Skip if this is not a control plane
+	// 如果这不是控制平面，则跳过
 	if data.Cfg().ControlPlane == nil {
 		return nil
 	}
@@ -52,15 +51,14 @@ func runCheckEtcdPhase(c workflow.RunData) error {
 	}
 
 	if cfg.Etcd.External != nil {
-		fmt.Println("[check-etcd] Skipping etcd check in external mode")
+		fmt.Println("[check-etcd] 在外部模式下跳过etcd检查")
 		return nil
 	}
 
 	fmt.Println("[check-etcd] Checking that the etcd cluster is healthy")
 
-	// Checks that the etcd cluster is healthy
-	// NB. this check cannot be implemented before because it requires the admin.conf and all the certificates
-	//     for connecting to etcd already in place
+	// 检查etcd集群是否正常
+	// 注意 这种检查以前无法实现，因为它需要admin.conf和所有连接到etcd的证书
 	client, err := data.ClientSet()
 	if err != nil {
 		return err

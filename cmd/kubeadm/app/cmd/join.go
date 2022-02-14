@@ -159,7 +159,7 @@ func newCmdJoin(out io.Writer, joinOptions *joinOptions) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "join [api-server-endpoint]",
-		Short: "Run this on any machine you wish to join an existing cluster",
+		Short: "在任何希望加入现有集群的计算机上运行此程序",
 		Long:  joinLongDescription,
 		RunE: func(cmd *cobra.Command, args []string) error {
 
@@ -174,12 +174,12 @@ func newCmdJoin(out io.Writer, joinOptions *joinOptions) *cobra.Command {
 				return err
 			}
 
-			// if the node is hosting a new control plane instance
+			// 如果该节点托管新的控制平面实例
 			if data.cfg.ControlPlane != nil {
-				// outputs the join control plane done message and exit
+				// 输出加入控制平面完成消息并退出
 				etcdMessage := ""
 				if data.initCfg.Etcd.External == nil {
-					etcdMessage = "* A new etcd member was added to the local/stacked etcd cluster."
+					etcdMessage = "* 一个新的etcd成员被添加到本地/堆叠的etcd集群中。"
 				}
 
 				ctx := map[string]string{
@@ -191,14 +191,14 @@ func newCmdJoin(out io.Writer, joinOptions *joinOptions) *cobra.Command {
 				}
 
 			} else {
-				// otherwise, if the node joined as a worker node;
-				// outputs the join done message and exit
-				fmt.Fprint(data.outputWriter, joinWorkerNodeDoneMsg)
+				// 否则，如果该节点作为工作节点加入；
+				// 输出加入完成消息并退出
+				_, _ = fmt.Fprint(data.outputWriter, joinWorkerNodeDoneMsg)
 			}
 
 			return nil
 		},
-		// We accept the control-plane location as an optional positional argument
+		// 我们接受控制平面位置作为可选的位置参数
 		Args: cobra.MaximumNArgs(1),
 	}
 
