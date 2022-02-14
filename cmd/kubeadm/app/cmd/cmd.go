@@ -38,7 +38,7 @@ func NewKubeadmCommand(in io.Reader, out, err io.Writer) *cobra.Command {
 	// 显示与kubeadm主命令相关的帮助信息
 	cmds := &cobra.Command{
 		Use:   "kubeadm",
-		Short: "kuibeadm: 轻松的启动一个安全的Kubernetes集群",
+		Short: "kubeadm: 轻松的启动一个安全的Kubernetes集群",
 		Long: dedent.Dedent(`
 
 			    ┌──────────────────────────────────────────────────────────┐
