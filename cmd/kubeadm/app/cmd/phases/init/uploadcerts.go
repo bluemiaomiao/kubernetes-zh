@@ -48,11 +48,11 @@ func NewUploadCertsPhase() workflow.Phase {
 func runUploadCerts(c workflow.RunData) error {
 	data, ok := c.(InitData)
 	if !ok {
-		return errors.New("upload-certs phase invoked with an invalid data struct")
+		return errors.New("使用无效的数据结构调用upload-certs阶段")
 	}
 
 	if !data.UploadCerts() {
-		fmt.Printf("[upload-certs] Skipping phase. Please see --%s\n", options.UploadCerts)
+		fmt.Printf("[upload-certs] 跳过此阶段. 请看 --%s\n", options.UploadCerts)
 		return nil
 	}
 	client, err := data.Client()
@@ -69,10 +69,10 @@ func runUploadCerts(c workflow.RunData) error {
 	}
 
 	if err := copycerts.UploadCerts(client, data.Cfg(), data.CertificateKey()); err != nil {
-		return errors.Wrap(err, "error uploading certs")
+		return errors.Wrap(err, "上传证书时出错")
 	}
 	if !data.SkipCertificateKeyPrint() {
-		fmt.Printf("[upload-certs] Using certificate key:\n%s\n", data.CertificateKey())
+		fmt.Printf("[upload-certs] 使用证书密钥:\n%s\n", data.CertificateKey())
 	}
 	return nil
 }

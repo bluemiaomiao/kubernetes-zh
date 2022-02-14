@@ -38,41 +38,40 @@ var (
 	}{
 		kubeadmconstants.AdminKubeConfigFileName: {
 			name:  "admin",
-			short: "Generate a kubeconfig file for the admin to use and for kubeadm itself",
-			long:  "Generate the kubeconfig file for the admin and for kubeadm itself, and save it to %s file.",
+			short: "为管理员和kubeadm本身生成一个kubeconfig文件",
+			long:  "为管理员和kubeadm本身生成kubeconfig文件，并将其保存到%s文件。",
 		},
 		kubeadmconstants.KubeletKubeConfigFileName: {
 			name:  "kubelet",
-			short: "Generate a kubeconfig file for the kubelet to use *only* for cluster bootstrapping purposes",
+			short: "为kubelet生成一个kubeconfig文件，以便仅*用于群集引导",
 			long: cmdutil.LongDesc(`
-					Generate the kubeconfig file for the kubelet to use and save it to %s file.
+					生成kubeconfig文件供kubelet使用，并将其保存到%s文件中。
 
-					Please note that this should *only* be used for cluster bootstrapping purposes. After your control plane is up,
-					you should request all kubelet credentials from the CSR API.`),
+					请注意，这应该仅用于群集引导。控制平面启动后，您应该从企业社会责任应用编程接口请求所有kubelet凭据。`),
 		},
 		kubeadmconstants.ControllerManagerKubeConfigFileName: {
 			name:  "controller-manager",
-			short: "Generate a kubeconfig file for the controller manager to use",
-			long:  "Generate the kubeconfig file for the controller manager to use and save it to %s file",
+			short: "生成一个kubeconfig文件供控制器管理器使用",
+			long:  "生成kubeconfig文件供控制器管理器使用，并将其保存到%s文件中",
 		},
 		kubeadmconstants.SchedulerKubeConfigFileName: {
 			name:  "scheduler",
-			short: "Generate a kubeconfig file for the scheduler to use",
-			long:  "Generate the kubeconfig file for the scheduler to use and save it to %s file.",
+			short: "生成一个kubeconfig文件供调度程序使用",
+			long:  "生成kubeconfig文件供调度程序使用，并将其保存到%s文件。",
 		},
 	}
 )
 
-// NewKubeConfigPhase creates a kubeadm workflow phase that creates all kubeconfig files necessary to establish the control plane and the admin kubeconfig file.
+// NewKubeConfigPhase 创建kubeadm工作流阶段，该阶段创建建立控制平面和管理kubeconfig文件所需的所有kubeconfig文件。
 func NewKubeConfigPhase() workflow.Phase {
 	return workflow.Phase{
 		Name:  "kubeconfig",
-		Short: "Generate all kubeconfig files necessary to establish the control plane and the admin kubeconfig file",
+		Short: "生成全部的kubeconfig文件, 建立控制平面和管理必须的kubeconfig文件",
 		Long:  cmdutil.MacroCommandLongDescription,
 		Phases: []workflow.Phase{
 			{
 				Name:           "all",
-				Short:          "Generate all kubeconfig files",
+				Short:          "生成全部的kubeconfig文件",
 				InheritFlags:   getKubeConfigPhaseFlags("all"),
 				RunAllSiblings: true,
 			},
@@ -85,7 +84,7 @@ func NewKubeConfigPhase() workflow.Phase {
 	}
 }
 
-// NewKubeConfigFilePhase creates a kubeadm workflow phase that creates a kubeconfig file.
+// NewKubeConfigFilePhase 创建kubeadm工作流阶段，该阶段创建kubeconfig文件。
 func NewKubeConfigFilePhase(kubeConfigFileName string) workflow.Phase {
 	return workflow.Phase{
 		Name:         kubeconfigFilePhaseProperties[kubeConfigFileName].name,
@@ -117,10 +116,10 @@ func getKubeConfigPhaseFlags(name string) []string {
 func runKubeConfig(c workflow.RunData) error {
 	data, ok := c.(InitData)
 	if !ok {
-		return errors.New("kubeconfig phase invoked with an invalid data struct")
+		return errors.New("使用无效的数据结构调用kubeconfig阶段")
 	}
 
-	fmt.Printf("[kubeconfig] Using kubeconfig folder %q\n", data.KubeConfigDir())
+	fmt.Printf("[kubeconfig] 使用kubeconfig目录 %q\n", data.KubeConfigDir())
 	return nil
 }
 

@@ -17,10 +17,10 @@ limitations under the License.
 package options
 
 const (
-	// APIServerAdvertiseAddress flag sets the IP address the API Server will advertise it's listening on. Specify '0.0.0.0' to use the address of the default network interface.
+	// APIServerAdvertiseAddress 标志设置应用编程接口服务器将通告它正在监听的IP地址。指定“0.0.0.0”使用默认网络接口的地址。
 	APIServerAdvertiseAddress = "apiserver-advertise-address"
 
-	// APIServerBindPort flag sets the port for the API Server to bind to.
+	// APIServerBindPort 标志设置API Server绑定到的端口。
 	APIServerBindPort = "apiserver-bind-port"
 
 	// APIServerCertSANs flag sets extra Subject Alternative Names (SANs) to use for the API Server serving certificate. Can be both IP addresses and DNS names.
@@ -38,7 +38,7 @@ const (
 	// ControllerManagerExtraArgs flag sets extra flags to pass to the Controller Manager or override default ones in form of <flagname>=<value>.
 	ControllerManagerExtraArgs = "controller-manager-extra-args"
 
-	// ControlPlaneEndpoint flag sets a stable IP address or DNS name for the control plane.
+	// ControlPlaneEndpoint 标志为控制平面设置一个稳定的IP地址或DNS名称。
 	ControlPlaneEndpoint = "control-plane-endpoint"
 
 	// DryRun flag instruct kubeadm to don't apply any changes; just output what would be done.

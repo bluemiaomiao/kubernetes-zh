@@ -42,11 +42,11 @@ var (
 		`)
 )
 
-// NewEtcdPhase creates a kubeadm workflow phase that implements handling of etcd.
+// NewEtcdPhase 创建实现etcd处理的kubeadm工作流阶段。
 func NewEtcdPhase() workflow.Phase {
 	phase := workflow.Phase{
 		Name:  "etcd",
-		Short: "Generate static Pod manifest file for local etcd",
+		Short: "为本地etcd生成静态Pod清单文件",
 		Long:  cmdutil.MacroCommandLongDescription,
 		Phases: []workflow.Phase{
 			newEtcdLocalSubPhase(),
@@ -100,7 +100,7 @@ func runEtcdPhaseLocal() func(c workflow.RunData) error {
 				return errors.Wrap(err, "error creating local etcd static pod manifest file")
 			}
 		} else {
-			klog.V(1).Infoln("[etcd] External etcd mode. Skipping the creation of a manifest for local etcd")
+			klog.V(1).Infoln("[etcd] 外部etcd模式。跳过本地etcd清单的创建")
 		}
 		return nil
 	}

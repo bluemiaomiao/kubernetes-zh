@@ -44,12 +44,12 @@ var (
 		`)
 )
 
-// NewBootstrapTokenPhase returns the phase to bootstrapToken
+// NewBootstrapTokenPhase 将阶段返回到bootstrapToken
 func NewBootstrapTokenPhase() workflow.Phase {
 	return workflow.Phase{
 		Name:    "bootstrap-token",
 		Aliases: []string{"bootstraptoken"},
-		Short:   "Generates bootstrap tokens used to join a node to a cluster",
+		Short:   "生成用于将节点加入群集的引导Token",
 		Example: bootstrapTokenExamples,
 		Long:    bootstrapTokenLongDesc,
 		InheritFlags: []string{

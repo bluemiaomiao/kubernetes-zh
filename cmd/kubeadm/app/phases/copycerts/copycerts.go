@@ -77,7 +77,7 @@ func createShortLivedBootstrapToken(client clientset.Interface) (string, error) 
 	return tokens[0].Token.ID, nil
 }
 
-//CreateCertificateKey returns a cryptographically secure random key
+//CreateCertificateKey 返回加密安全的随机密钥
 func CreateCertificateKey() (string, error) {
 	randBytes, err := cryptoutil.CreateRandBytes(kubeadmconstants.CertificateKeySize)
 	if err != nil {
@@ -86,12 +86,12 @@ func CreateCertificateKey() (string, error) {
 	return hex.EncodeToString(randBytes), nil
 }
 
-//UploadCerts save certs needs to join a new control-plane on kubeadm-certs sercret.
+//UploadCerts 保存证书需要在kubeadm-certs这个Secret上加入一个新的控制平面
 func UploadCerts(client clientset.Interface, cfg *kubeadmapi.InitConfiguration, key string) error {
-	fmt.Printf("[upload-certs] Storing the certificates in Secret %q in the %q Namespace\n", kubeadmconstants.KubeadmCertsSecret, metav1.NamespaceSystem)
+	fmt.Printf("[upload-certs] 将证书保存到 Secret %q 在 %q 名称空间\n", kubeadmconstants.KubeadmCertsSecret, metav1.NamespaceSystem)
 	decodedKey, err := hex.DecodeString(key)
 	if err != nil {
-		return errors.Wrap(err, "error decoding certificate key")
+		return errors.Wrap(err, "解码证书密钥时出错")
 	}
 	tokenID, err := createShortLivedBootstrapToken(client)
 	if err != nil {

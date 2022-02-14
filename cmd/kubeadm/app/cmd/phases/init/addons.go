@@ -40,11 +40,11 @@ var (
 		`)
 )
 
-// NewAddonPhase returns the addon Cobra command
+// NewAddonPhase 返回addon的Cobra命令
 func NewAddonPhase() workflow.Phase {
 	return workflow.Phase{
 		Name:  "addon",
-		Short: "Install required addons for passing conformance tests",
+		Short: "安装通过一致性测试所需的插件",
 		Long:  cmdutil.MacroCommandLongDescription,
 		Phases: []workflow.Phase{
 			{

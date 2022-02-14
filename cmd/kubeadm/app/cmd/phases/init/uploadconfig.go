@@ -59,23 +59,23 @@ var (
 		`)
 )
 
-// NewUploadConfigPhase returns the phase to uploadConfig
+// NewUploadConfigPhase 将阶段返回到上传配置
 func NewUploadConfigPhase() workflow.Phase {
 	return workflow.Phase{
 		Name:    "upload-config",
 		Aliases: []string{"uploadconfig"},
-		Short:   "Upload the kubeadm and kubelet configuration to a ConfigMap",
+		Short:   "上传kubeadm和kubelet配置到 ConfigMap",
 		Long:    cmdutil.MacroCommandLongDescription,
 		Phases: []workflow.Phase{
 			{
 				Name:           "all",
-				Short:          "Upload all configuration to a config map",
+				Short:          "上传全部的配置到ConfigMap",
 				RunAllSiblings: true,
 				InheritFlags:   getUploadConfigPhaseFlags(),
 			},
 			{
 				Name:         "kubeadm",
-				Short:        "Upload the kubeadm ClusterConfiguration to a ConfigMap",
+				Short:        "上传kubeadm的配置到ConfigMap",
 				Long:         uploadKubeadmConfigLongDesc,
 				Example:      uploadKubeadmConfigExample,
 				Run:          runUploadKubeadmConfig,
@@ -83,7 +83,7 @@ func NewUploadConfigPhase() workflow.Phase {
 			},
 			{
 				Name:         "kubelet",
-				Short:        "Upload the kubelet component config to a ConfigMap",
+				Short:        "上传kubelet的配置到ConfigMap",
 				Long:         uploadKubeletConfigLongDesc,
 				Example:      uploadKubeletConfigExample,
 				Run:          runUploadKubeletConfig,

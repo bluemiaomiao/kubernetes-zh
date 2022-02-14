@@ -37,7 +37,7 @@ const (
 	NodesKubeadmConfigClusterRoleName = "kubeadm:nodes-kubeadm-config"
 )
 
-// UploadConfiguration saves the InitConfiguration used for later reference (when upgrading for instance)
+// UploadConfiguration 保存初始配置供以后参考(例如升级时)
 func UploadConfiguration(cfg *kubeadmapi.InitConfiguration, client clientset.Interface) error {
 	fmt.Printf("[upload-config] Storing the configuration used in ConfigMap %q in the %q Namespace\n", kubeadmconstants.KubeadmConfigConfigMap, metav1.NamespaceSystem)
 

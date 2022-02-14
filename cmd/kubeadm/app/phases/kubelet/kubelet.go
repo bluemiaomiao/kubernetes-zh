@@ -42,9 +42,9 @@ func TryStartKubelet() {
 	}
 }
 
-// TryStopKubelet attempts to bring down the kubelet service momentarily
+// TryStopKubelet 试图暂时关闭kubelet服务
 func TryStopKubelet() {
-	// If we notice that the kubelet service is inactive, try to start it
+	// 如果我们注意到kubelet服务处于非活动状态，请尝试启动它
 	initSystem, err := initsystem.GetInitSystem()
 	if err != nil {
 		fmt.Println("[kubelet-start] no supported init system detected, won't make sure the kubelet not running for a short period of time while setting up configuration for it.")

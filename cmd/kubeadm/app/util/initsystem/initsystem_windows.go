@@ -1,3 +1,4 @@
+//go:build windows
 // +build windows
 
 /*
@@ -26,7 +27,7 @@ import (
 	"golang.org/x/sys/windows/svc/mgr"
 )
 
-// WindowsInitSystem is the windows implementation of InitSystem
+// WindowsInitSystem 是InitSystem的Windows实现
 type WindowsInitSystem struct{}
 
 // EnableCommand return a string describing how to enable a service
@@ -232,14 +233,18 @@ func (sysd WindowsInitSystem) ServiceIsActive(service string) bool {
 	return status.State == svc.Running
 }
 
-// GetInitSystem returns an InitSystem for the current system, or nil
-// if we cannot detect a supported init system.
-// This indicates we will skip init system checks, not an error.
+// GetInitSystem 返回当前系统的InitSystem，或者nil
+// 如果我们检测不到支持的InitSystem。
+//这表明我们将跳过InitSystem检查，而不是错误。
 func GetInitSystem() (InitSystem, error) {
+	// mgr包是个用于对Windows系统服务进行增删改查的包
 	m, err := mgr.Connect()
 	if err != nil {
-		return nil, fmt.Errorf("no supported init system detected: %v", err)
+		return nil, fmt.Errorf("未检测到支持的初始化系统: %v", err)
 	}
-	defer m.Disconnect()
+	// defer m.Disconnect()
+	defer func(m *mgr.Mgr) {
+		_ = m.Disconnect()
+	}(m)
 	return &WindowsInitSystem{}, nil
 }

@@ -35,11 +35,11 @@ var (
 		`)
 )
 
-// NewMarkControlPlanePhase creates a kubeadm workflow phase that implements mark-controlplane checks.
+// NewMarkControlPlanePhase 创建实现标记控制平面检查的kubeadm工作流阶段。
 func NewMarkControlPlanePhase() workflow.Phase {
 	return workflow.Phase{
 		Name:    "mark-control-plane",
-		Short:   "Mark a node as a control-plane",
+		Short:   "标记一个节点为控制平面",
 		Example: markControlPlaneExample,
 		InheritFlags: []string{
 			options.NodeName,
@@ -49,7 +49,7 @@ func NewMarkControlPlanePhase() workflow.Phase {
 	}
 }
 
-// runMarkControlPlane executes mark-control-plane checks logic.
+// runMarkControlPlane 执行标记逻辑
 func runMarkControlPlane(c workflow.RunData) error {
 	data, ok := c.(InitData)
 	if !ok {

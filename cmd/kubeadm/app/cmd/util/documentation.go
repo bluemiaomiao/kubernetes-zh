@@ -21,14 +21,14 @@ import (
 )
 
 var (
-	// AlphaDisclaimer to be places at the end of description of commands in alpha release
+	// AlphaDisclaimer 放在alpha版本中命令描述的末尾
 	AlphaDisclaimer = `
-		Alpha Disclaimer: this command is currently alpha.
+		Alpha免责声明:该命令当前为alpha。
 	`
 
-	// MacroCommandLongDescription provide a standard description for "macro" commands
+	// MacroCommandLongDescription 为“宏”命令提供标准描述
 	MacroCommandLongDescription = LongDesc(`
-		This command is not meant to be run on its own. See list of available subcommands.
+		这个命令不应该单独运行。请参见可用子命令列表。
 	`)
 )
 

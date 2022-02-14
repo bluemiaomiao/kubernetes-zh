@@ -37,45 +37,44 @@ import (
 
 var (
 	saKeyLongDesc = fmt.Sprintf(cmdutil.LongDesc(`
-		Generate the private key for signing service account tokens along with its public key, and save them into
-		%s and %s files.
-		If both files already exist, kubeadm skips the generation step and existing files will be used.
+		生成用于签署服务帐户令牌的私钥及其公钥，并将它们保存到
+		%s 和 %s 文件中.
+		如果两个文件都已经存在，kubeadm将跳过生成步骤，将使用现有文件。
 		`+cmdutil.AlphaDisclaimer), kubeadmconstants.ServiceAccountPrivateKeyName, kubeadmconstants.ServiceAccountPublicKeyName)
 
 	genericLongDesc = cmdutil.LongDesc(`
-		Generate the %[1]s, and save them into %[2]s.crt and %[2]s.key files.%[3]s
+		生成 %[1]s, 并将它们保存到 %[2]s.crt 和 %[2]s.key files.%[3]s
 
-		If both files already exist, kubeadm skips the generation step and existing files will be used.
+		如果这两个文件都已经存在，kubeadm将跳过生成步骤，并使用现有文件
 		` + cmdutil.AlphaDisclaimer)
 )
 
-// NewCertsPhase returns the phase for the certs
+// NewCertsPhase 返回证书的阶段
 func NewCertsPhase() workflow.Phase {
 	return workflow.Phase{
 		Name:   "certs",
-		Short:  "Certificate generation",
+		Short:  "证书生成",
 		Phases: newCertSubPhases(),
 		Run:    runCerts,
 		Long:   cmdutil.MacroCommandLongDescription,
 	}
 }
 
-// newCertSubPhases returns sub phases for certs phase
+// newCertSubPhases 返回certs阶段的子阶段
 func newCertSubPhases() []workflow.Phase {
 	subPhases := []workflow.Phase{}
 
-	// All subphase
+	// 全部的子阶段
 	allPhase := workflow.Phase{
 		Name:           "all",
-		Short:          "Generate all certificates",
+		Short:          "创建全部的证书",
 		InheritFlags:   getCertPhaseFlags("all"),
 		RunAllSiblings: true,
 	}
 
 	subPhases = append(subPhases, allPhase)
 
-	// This loop assumes that GetDefaultCertList() always returns a list of
-	// certificate that is preceded by the CAs that sign them.
+	// 此循环假设GetDefaultCertList()总是返回一个证书列表，该列表前面是对它们签名的CA。
 	var lastCACert *certsphase.KubeadmCert
 	for _, cert := range certsphase.GetDefaultCertList() {
 		var phase workflow.Phase
@@ -88,10 +87,10 @@ func newCertSubPhases() []workflow.Phase {
 		subPhases = append(subPhases, phase)
 	}
 
-	// SA creates the private/public key pair, which doesn't use x509 at all
+	// SA创建私有/公共密钥对，它根本不使用x509
 	saPhase := workflow.Phase{
 		Name:         "sa",
-		Short:        "Generate a private key for signing service account tokens along with its public key",
+		Short:        "生成用于签署服务帐户令牌的私钥及其公钥",
 		Long:         saKeyLongDesc,
 		Run:          runCertsSa,
 		InheritFlags: []string{options.CertificatesDir},
@@ -105,7 +104,7 @@ func newCertSubPhases() []workflow.Phase {
 func newCertSubPhase(certSpec *certsphase.KubeadmCert, run func(c workflow.RunData) error) workflow.Phase {
 	phase := workflow.Phase{
 		Name:  certSpec.Name,
-		Short: fmt.Sprintf("Generate the %s", certSpec.LongName),
+		Short: fmt.Sprintf("生成 %s", certSpec.LongName),
 		Long: fmt.Sprintf(
 			genericLongDesc,
 			certSpec.LongName,
@@ -177,28 +176,28 @@ func getSANDescription(certSpec *certsphase.KubeadmCert) string {
 func runCertsSa(c workflow.RunData) error {
 	data, ok := c.(InitData)
 	if !ok {
-		return errors.New("certs phase invoked with an invalid data struct")
+		return errors.New("使用无效的数据结构调用certs阶段")
 	}
 
-	// if external CA mode, skip service account key generation
+	// 如果是外部CA模式，跳过服务帐户密钥生成
 	if data.ExternalCA() {
-		fmt.Printf("[certs] Using existing sa keys\n")
+		fmt.Printf("[证书] 使用现有SA密钥\n")
 		return nil
 	}
 
-	// create the new service account key (or use existing)
+	// 创建新的服务账户密钥(或使用现有密钥)
 	return certsphase.CreateServiceAccountKeyAndPublicKeyFiles(data.CertificateWriteDir(), data.Cfg().ClusterConfiguration.PublicKeyAlgorithm())
 }
 
 func runCerts(c workflow.RunData) error {
 	data, ok := c.(InitData)
 	if !ok {
-		return errors.New("certs phase invoked with an invalid data struct")
+		return errors.New("使用无效的数据结构调用certs阶段")
 	}
 
-	fmt.Printf("[certs] Using certificateDir folder %q\n", data.CertificateWriteDir())
+	fmt.Printf("[证书] 使用证书文件夹 %q\n", data.CertificateWriteDir())
 
-	// If using an external CA while dryrun, copy CA cert to dryrun dir for later use
+	// 如果在试运行时使用外部证书颁发机构，请将证书颁发机构证书复制到试运行目录以备后用
 	if data.ExternalCA() && data.DryRun() {
 		externalCAFile := filepath.Join(data.Cfg().CertificatesDir, kubeadmconstants.CACertName)
 		fileInfo, _ := os.Stat(externalCAFile)
@@ -218,12 +217,12 @@ func runCAPhase(ca *certsphase.KubeadmCert) func(c workflow.RunData) error {
 	return func(c workflow.RunData) error {
 		data, ok := c.(InitData)
 		if !ok {
-			return errors.New("certs phase invoked with an invalid data struct")
+			return errors.New("使用无效的数据结构调用certs阶段")
 		}
 
-		// if using external etcd, skips etcd certificate authority generation
+		// 如果使用外部etcd，跳过etcd证书颁发机构的生成
 		if data.Cfg().Etcd.External != nil && ca.Name == "etcd-ca" {
-			fmt.Printf("[certs] External etcd mode: Skipping %s certificate authority generation\n", ca.BaseName)
+			fmt.Printf("[证书] 外部etcd模式: 跳过 %s 证书颁发机构生成\n", ca.BaseName)
 			return nil
 		}
 
@@ -231,19 +230,19 @@ func runCAPhase(ca *certsphase.KubeadmCert) func(c workflow.RunData) error {
 			certsphase.CheckCertificatePeriodValidity(ca.BaseName, cert)
 
 			if _, err := pkiutil.TryLoadKeyFromDisk(data.CertificateDir(), ca.BaseName); err == nil {
-				fmt.Printf("[certs] Using existing %s certificate authority\n", ca.BaseName)
+				fmt.Printf("[证书] 使用已经存在的 %s 认证授权\n", ca.BaseName)
 				return nil
 			}
-			fmt.Printf("[certs] Using existing %s keyless certificate authority\n", ca.BaseName)
+			fmt.Printf("[证书] 使用已经存在的 %s 无Key证书颁发机构\n", ca.BaseName)
 			return nil
 		}
 
-		// if dryrunning, write certificates authority to a temporary folder (and defer restore to the path originally specified by the user)
+		// 如果正在运行，请将证书颁发机构写入临时文件夹(并将恢复推迟到用户最初指定的路径)
 		cfg := data.Cfg()
 		cfg.CertificatesDir = data.CertificateWriteDir()
 		defer func() { cfg.CertificatesDir = data.CertificateDir() }()
 
-		// create the new certificate authority (or use existing)
+		// 创建新的证书颁发机构(或使用现有的)
 		return certsphase.CreateCACertAndKeyFiles(ca, cfg)
 	}
 }

@@ -50,9 +50,9 @@ const (
 	etcdHealthyCheckRetries  = 8
 )
 
-// CreateLocalEtcdStaticPodManifestFile will write local etcd static pod manifest file.
-// This function is used by init - when the etcd cluster is empty - or by kubeadm
-// upgrade - when the etcd cluster is already up and running (and the --initial-cluster flag have no impact)
+// CreateLocalEtcdStaticPodManifestFile 将编写本地etcd静态Pod清单文件。
+// 当etcd集群是空的时候，kubeadm init使用这个函数
+// 当etcd集群已经运行时，kubeadm upgrade使用这个函数
 func CreateLocalEtcdStaticPodManifestFile(manifestDir, patchesDir string, nodeName string, cfg *kubeadmapi.ClusterConfiguration, endpoint *kubeadmapi.APIEndpoint, isDryRun bool) error {
 	if cfg.Etcd.External != nil {
 		return errors.New("etcd static pod manifest cannot be generated for cluster using external etcd")
@@ -191,8 +191,8 @@ func CreateStackedEtcdStaticPodManifestFile(client clientset.Interface, manifest
 	return nil
 }
 
-// GetEtcdPodSpec returns the etcd static Pod actualized to the context of the current configuration
-// NB. GetEtcdPodSpec methods holds the information about how kubeadm creates etcd static pod manifests.
+// GetEtcdPodSpec 返回在当前配置的上下文中实现的etcd静态Pod
+// 注意 GetEtcdPodSpec 方法保存关于kubeadm如何创建etcd静态pod清单的信息。
 func GetEtcdPodSpec(cfg *kubeadmapi.ClusterConfiguration, endpoint *kubeadmapi.APIEndpoint, nodeName string, initialCluster []etcdutil.Member) v1.Pod {
 	pathType := v1.HostPathDirectoryOrCreate
 	etcdMounts := map[string]v1.Volume{
@@ -272,7 +272,7 @@ func getEtcdCommand(cfg *kubeadmapi.ClusterConfiguration, endpoint *kubeadmapi.A
 }
 
 func prepareAndWriteEtcdStaticPod(manifestDir string, patchesDir string, cfg *kubeadmapi.ClusterConfiguration, endpoint *kubeadmapi.APIEndpoint, nodeName string, initialCluster []etcdutil.Member, isDryRun bool) error {
-	// gets etcd StaticPodSpec, actualized for the current ClusterConfiguration and the new list of etcd members
+	// 获取etcd StaticPodSpec，为当前集群配置和etcd成员的新列表实现
 	spec := GetEtcdPodSpec(cfg, endpoint, nodeName, initialCluster)
 
 	var usersAndGroups *users.UsersAndGroups

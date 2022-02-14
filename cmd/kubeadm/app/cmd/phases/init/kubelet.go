@@ -31,17 +31,17 @@ import (
 
 var (
 	kubeletStartPhaseExample = cmdutil.Examples(`
-		# Writes a dynamic environment file with kubelet flags from a InitConfiguration file.
+		# 从InitConfiguration文件中写入带有kubelet标志的动态环境文件。
 		kubeadm init phase kubelet-start --config config.yaml
 		`)
 )
 
-// NewKubeletStartPhase creates a kubeadm workflow phase that start kubelet on a node.
+// NewKubeletStartPhase 创建一个kubeadm工作流阶段，在节点上启动kubelet。
 func NewKubeletStartPhase() workflow.Phase {
 	return workflow.Phase{
 		Name:    "kubelet-start",
-		Short:   "Write kubelet settings and (re)start the kubelet",
-		Long:    "Write a file with KubeletConfiguration and an environment file with node specific kubelet settings, and then (re)start kubelet.",
+		Short:   "编写kubelet设置并(重新)启动kubelet",
+		Long:    "编写一个带有KubeletConfiguration的文件和一个带有节点特定kubelet设置的环境文件，然后(重新)启动kubelet。",
 		Example: kubeletStartPhaseExample,
 		Run:     runKubeletStart,
 		InheritFlags: []string{
@@ -52,17 +52,17 @@ func NewKubeletStartPhase() workflow.Phase {
 	}
 }
 
-// runKubeletStart executes kubelet start logic.
+// runKubeletStart 执行kubelet启动逻辑
 func runKubeletStart(c workflow.RunData) error {
 	data, ok := c.(InitData)
 	if !ok {
-		return errors.New("kubelet-start phase invoked with an invalid data struct")
+		return errors.New("启动kubelet阶段使用无效数据结构")
 	}
 
 	// First off, configure the kubelet. In this short timeframe, kubeadm is trying to stop/restart the kubelet
 	// Try to stop the kubelet service so no race conditions occur when configuring it
 	if !data.DryRun() {
-		klog.V(1).Infoln("Stopping the kubelet")
+		klog.V(1).Infoln("正在停止kubelet")
 		kubeletphase.TryStopKubelet()
 	}
 
@@ -80,7 +80,7 @@ func runKubeletStart(c workflow.RunData) error {
 
 	// Try to start the kubelet service in case it's inactive
 	if !data.DryRun() {
-		fmt.Println("[kubelet-start] Starting the kubelet")
+		fmt.Println("[启动kubelet] 正在启动kubelet")
 		kubeletphase.TryStartKubelet()
 	}
 

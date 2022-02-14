@@ -37,7 +37,7 @@ import (
 
 // Waiter is an interface for waiting for criteria in Kubernetes to happen
 type Waiter interface {
-	// WaitForAPI waits for the API Server's /healthz endpoint to become "ok"
+	// WaitForAPI 等待API Server的/healthz 端点变为ok这个值
 	WaitForAPI() error
 	// WaitForPodsWithLabel waits for Pods in the kube-system namespace to become Ready
 	WaitForPodsWithLabel(kvLabel string) error
@@ -50,9 +50,9 @@ type Waiter interface {
 	WaitForStaticPodHashChange(nodeName, component, previousHash string) error
 	// WaitForStaticPodControlPlaneHashes fetches sha256 hashes for the control plane static pods
 	WaitForStaticPodControlPlaneHashes(nodeName string) (map[string]string, error)
-	// WaitForHealthyKubelet blocks until the kubelet /healthz endpoint returns 'ok'
+	// WaitForHealthyKubelet 阻塞，直到kubelet 的 /healthz 端点返回ok
 	WaitForHealthyKubelet(initialTimeout time.Duration, healthzEndpoint string) error
-	// WaitForKubeletAndFunc is a wrapper for WaitForHealthyKubelet that also blocks for a function
+	// WaitForKubeletAndFunc 是WaitForHealthyKubelet的包装器，它也是个阻塞函数
 	WaitForKubeletAndFunc(f func() error) error
 	// SetTimeout adjusts the timeout to the specified duration
 	SetTimeout(timeout time.Duration)
@@ -65,7 +65,7 @@ type KubeWaiter struct {
 	writer  io.Writer
 }
 
-// NewKubeWaiter returns a new Waiter object that talks to the given Kubernetes cluster
+// NewKubeWaiter 返回一个新的 Waiter 对象与给定的Kubernetes集群对话
 func NewKubeWaiter(client clientset.Interface, timeout time.Duration, writer io.Writer) Waiter {
 	return &KubeWaiter{
 		client:  client,
@@ -74,9 +74,10 @@ func NewKubeWaiter(client clientset.Interface, timeout time.Duration, writer io.
 	}
 }
 
-// WaitForAPI waits for the API Server's /healthz endpoint to report "ok"
+// WaitForAPI 等待API Server的 /healthz 端点返回ok
 func (w *KubeWaiter) WaitForAPI() error {
 	start := time.Now()
+	// 一直轮询API
 	return wait.PollImmediate(kubeadmconstants.APICallRetryInterval, w.timeout, func() (bool, error) {
 		healthStatus := 0
 		w.client.Discovery().RESTClient().Get().AbsPath("/healthz").Do(context.TODO()).StatusCode(&healthStatus)
@@ -84,7 +85,7 @@ func (w *KubeWaiter) WaitForAPI() error {
 			return false, nil
 		}
 
-		fmt.Printf("[apiclient] All control plane components are healthy after %f seconds\n", time.Since(start).Seconds())
+		fmt.Printf("[apiclient] 所有控制平面组件在 %f 秒\n", time.Since(start).Seconds())
 		return true, nil
 	})
 }
@@ -155,8 +156,8 @@ func (w *KubeWaiter) WaitForHealthyKubelet(initialTimeout time.Duration, healthz
 	}, 5) // a failureThreshold of five means waiting for a total of 155 seconds
 }
 
-// WaitForKubeletAndFunc waits primarily for the function f to execute, even though it might take some time. If that takes a long time, and the kubelet
-// /healthz continuously are unhealthy, kubeadm will error out after a period of exponential backoff
+// WaitForKubeletAndFunc 主要等待函数f执行，尽管这可能需要一些时间。
+// 如果这需要很长时间，并且kubelet /healthz 持续不健康，kubeadm将在一段时间的指数回退后出错
 func (w *KubeWaiter) WaitForKubeletAndFunc(f func() error) error {
 	errorChan := make(chan error, 1)
 
@@ -167,12 +168,12 @@ func (w *KubeWaiter) WaitForKubeletAndFunc(f func() error) error {
 	}(errorChan, w)
 
 	go func(errC chan error, waiter Waiter) {
-		// This main goroutine sends whatever the f function returns (error or not) to the channel
-		// This in order to continue on success (nil error), or just fail if the function returns an error
+		// 这个主goroutine将f函数返回的任何内容(错误与否)发送到通道
+		// 这是为了继续成功(无错误)，或者如果函数返回错误则失败
 		errC <- f()
 	}(errorChan, w)
 
-	// This call is blocking until one of the goroutines sends to errorChan
+	// 此调用被阻止，直到其中一个goroutines发送到errorChan
 	return <-errorChan
 }
 

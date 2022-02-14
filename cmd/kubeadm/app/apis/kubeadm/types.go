@@ -36,9 +36,8 @@ import (
 type InitConfiguration struct {
 	metav1.TypeMeta
 
-	// ClusterConfiguration holds the cluster-wide information, and embeds that struct (which can be (un)marshalled separately as well)
-	// When InitConfiguration is marshalled to bytes in the external version, this information IS NOT preserved (which can be seen from
-	// the `json:"-"` tag in the external variant of these API types.
+	// ClusterConfiguration 保存集群范围内的信息，并嵌入该结构(也可以(取消)单独封送)
+	// 当InitConfiguration在外部版本中被封装成字节时，该信息不会被保留(这可以从这些API类型的外部变体中的`json:"-"`标记中看到。
 	ClusterConfiguration `json:"-"`
 
 	// BootstrapTokens is respected at `kubeadm init` time and describes a set of Bootstrap Tokens to create.
@@ -112,7 +111,7 @@ type ClusterConfiguration struct {
 	// DNS defines the options for the DNS add-on installed in the cluster.
 	DNS DNS
 
-	// CertificatesDir specifies where to store or look for all required certificates.
+	// CertificatesDir 指定存储或查找所有必需证书的位置。
 	CertificatesDir string
 
 	// ImageRepository sets the container registry to pull images from.
@@ -204,7 +203,7 @@ type APIEndpoint struct {
 // NodeRegistrationOptions 保存通过kubeadm init或kubeadm join向集群注册新的控制平面或节点相关的字段
 type NodeRegistrationOptions struct {
 
-	// Name 是将在此kubeadm init或kubeadm join操作中创建的节点应用编程接口对象的.Metadata.Name字段。
+	// Name 是将在此kubeadm init或kubeadm join操作中创建的节点API对象的.Metadata.Name字段。
 	// 该字段也用在kubelet到API服务器的客户端证书的CommonName字段中。如果未提供，则默认为节点的主机名。
 	Name string
 

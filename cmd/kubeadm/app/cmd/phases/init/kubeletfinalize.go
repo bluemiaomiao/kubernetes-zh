@@ -40,24 +40,23 @@ var (
 		`)
 )
 
-// NewKubeletFinalizePhase creates a kubeadm workflow phase that updates settings
-// relevant to the kubelet after TLS bootstrap.
+// NewKubeletFinalizePhase 创建kubeadm工作流阶段，在TLS引导后更新与kubelet相关的设置。
 func NewKubeletFinalizePhase() workflow.Phase {
 	return workflow.Phase{
 		Name:    "kubelet-finalize",
-		Short:   "Updates settings relevant to the kubelet after TLS bootstrap",
+		Short:   "在TLS引导后更新与kubelet相关的设置",
 		Example: kubeletFinalizePhaseExample,
 		Phases: []workflow.Phase{
 			{
 				Name:           "all",
-				Short:          "Run all kubelet-finalize phases",
+				Short:          "运行全部的kubelet-finalize阶段",
 				InheritFlags:   []string{options.CfgPath, options.CertificatesDir},
 				Example:        kubeletFinalizePhaseExample,
 				RunAllSiblings: true,
 			},
 			{
 				Name:         "experimental-cert-rotation",
-				Short:        "Enable kubelet client certificate rotation",
+				Short:        "启用kubelet客户端证书轮询",
 				InheritFlags: []string{options.CfgPath, options.CertificatesDir},
 				Run:          runKubeletFinalizeCertRotation,
 			},
@@ -65,9 +64,7 @@ func NewKubeletFinalizePhase() workflow.Phase {
 	}
 }
 
-// runKubeletFinalizeCertRotation detects if the kubelet certificate rotation is enabled
-// and updates the kubelet.conf file to point to a rotatable certificate and key for the
-// Node user.
+// runKubeletFinalizeCertRotation 检测是否启用了kubelet证书轮询，并更新kubelet.conf文件以指向节点用户的可循环证书和密钥
 func runKubeletFinalizeCertRotation(c workflow.RunData) error {
 	data, ok := c.(InitData)
 	if !ok {

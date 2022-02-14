@@ -61,16 +61,16 @@ func getPhaseDescription(component string) string {
 	return fmt.Sprintf("Generates the %s static Pod manifest", component)
 }
 
-// NewControlPlanePhase creates a kubeadm workflow phase that implements bootstrapping the control plane.
+// NewControlPlanePhase 创建kubeadm工作流阶段，实现控制平面的引导。
 func NewControlPlanePhase() workflow.Phase {
 	phase := workflow.Phase{
 		Name:  "control-plane",
-		Short: "Generate all static Pod manifest files necessary to establish the control plane",
+		Short: "生成建立控制平面所需的所有静态Pod清单文件",
 		Long:  cmdutil.MacroCommandLongDescription,
 		Phases: []workflow.Phase{
 			{
 				Name:           "all",
-				Short:          "Generate all static Pod manifest files",
+				Short:          "生成所有静态Pod清单文件",
 				InheritFlags:   getControlPlanePhaseFlags("all"),
 				Example:        controlPlaneExample,
 				RunAllSiblings: true,

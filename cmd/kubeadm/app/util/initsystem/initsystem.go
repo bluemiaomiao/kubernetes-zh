@@ -16,7 +16,7 @@ limitations under the License.
 
 package initsystem
 
-// InitSystem is the interface that describe behaviors of an init system
+// InitSystem 是描述初始化系统行为的接口
 type InitSystem interface {
 	// return a string describing how to enable a service
 	EnableCommand(service string) string

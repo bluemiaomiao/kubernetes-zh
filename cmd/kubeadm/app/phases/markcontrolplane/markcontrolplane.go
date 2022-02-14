@@ -34,15 +34,15 @@ var labelsToAdd = []string{
 	constants.LabelExcludeFromExternalLB,
 }
 
-// MarkControlPlane taints the control-plane and sets the control-plane label
+// MarkControlPlane 污染控制平面并设置控制平面标签
 func MarkControlPlane(client clientset.Interface, controlPlaneName string, taints []v1.Taint) error {
-	// TODO: remove this "deprecated" amend and pass "labelsToAdd" directly:
+	// TODO:删除此“已弃用”修改并直接传递“标签加载”:
 	// https://github.com/kubernetes/kubeadm/issues/2200
 	labels := make([]string, len(labelsToAdd))
 	copy(labels, labelsToAdd)
 	labels[0] = constants.LabelNodeRoleOldControlPlane + "(deprecated)"
 
-	fmt.Printf("[mark-control-plane] Marking the node %s as control-plane by adding the labels: %v\n",
+	fmt.Printf("[mark-control-plane] 通过添加标签将节点%s标记为控制平面: %v\n",
 		controlPlaneName, labels)
 
 	if len(taints) > 0 {
@@ -50,7 +50,7 @@ func MarkControlPlane(client clientset.Interface, controlPlaneName string, taint
 		for _, taint := range taints {
 			taintStrs = append(taintStrs, taint.ToString())
 		}
-		fmt.Printf("[mark-control-plane] Marking the node %s as control-plane by adding the taints %v\n", controlPlaneName, taintStrs)
+		fmt.Printf("[mark-control-plane] 通过添加污点将节点%s标记为控制平面 %v\n", controlPlaneName, taintStrs)
 	}
 
 	return apiclient.PatchNode(client, controlPlaneName, func(n *v1.Node) {

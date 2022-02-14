@@ -215,16 +215,16 @@ func (c Certificates) AsMap() CertificateMap {
 	return certMap
 }
 
-// GetDefaultCertList returns  all of the certificates kubeadm requires to function.
+// GetDefaultCertList 返回kubeadm运行所需的所有证书。
 func GetDefaultCertList() Certificates {
 	return Certificates{
 		KubeadmCertRootCA(),
 		KubeadmCertAPIServer(),
 		KubeadmCertKubeletClient(),
-		// Front Proxy certs
+		// 前端代理证书
 		KubeadmCertFrontProxyCA(),
 		KubeadmCertFrontProxyClient(),
-		// etcd certs
+		// etcd证书
 		KubeadmCertEtcdCA(),
 		KubeadmCertEtcdServer(),
 		KubeadmCertEtcdPeer(),
@@ -245,11 +245,11 @@ func GetCertsWithoutEtcd() Certificates {
 	}
 }
 
-// KubeadmCertRootCA is the definition of the Kubernetes Root CA for the API Server and kubelet.
+// KubeadmCertRootCA 是API Server和Kubernetes的根证书颁发机构的定义。
 func KubeadmCertRootCA() *KubeadmCert {
 	return &KubeadmCert{
 		Name:     "ca",
-		LongName: "self-signed Kubernetes CA to provision identities for other Kubernetes components",
+		LongName: "自签名Kubernetes CA为其他Kubernetes组件提供身份",
 		BaseName: kubeadmconstants.CACertAndKeyBaseName,
 		config: pkiutil.CertConfig{
 			Config: certutil.Config{
@@ -259,11 +259,11 @@ func KubeadmCertRootCA() *KubeadmCert {
 	}
 }
 
-// KubeadmCertAPIServer is the definition of the cert used to serve the Kubernetes API.
+// KubeadmCertAPIServer 是用于服务于Kubernetes API的证书的定义。
 func KubeadmCertAPIServer() *KubeadmCert {
 	return &KubeadmCert{
 		Name:     "apiserver",
-		LongName: "certificate for serving the Kubernetes API",
+		LongName: "为Kubernetes API服务的证书",
 		BaseName: kubeadmconstants.APIServerCertAndKeyBaseName,
 		CAName:   "ca",
 		config: pkiutil.CertConfig{

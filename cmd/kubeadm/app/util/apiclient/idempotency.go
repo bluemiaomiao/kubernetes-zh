@@ -324,8 +324,8 @@ func PatchNodeOnce(client clientset.Interface, nodeName string, patchFn func(*v1
 	}
 }
 
-// PatchNode tries to patch a node using patchFn for the actual mutating logic.
-// Retries are provided by the wait package.
+// PatchNode 尝试使用patchFn为实际的变异逻辑修补节点。
+// 重试由wait包提供。
 func PatchNode(client clientset.Interface, nodeName string, patchFn func(*v1.Node)) error {
 	// wait.Poll will rerun the condition function every interval function if
 	// the function returns false. If the condition function returns an error

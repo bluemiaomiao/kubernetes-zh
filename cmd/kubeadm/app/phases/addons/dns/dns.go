@@ -69,12 +69,12 @@ func DeployedDNSAddon(client clientset.Interface) (string, error) {
 	}
 }
 
-// deployedDNSReplicas returns the replica count for the current DNS deployment
+// deployedDNSReplicas 返回当前DNS部署的副本计数
 func deployedDNSReplicas(client clientset.Interface, replicas int32) (*int32, error) {
 	deploymentsClient := client.AppsV1().Deployments(metav1.NamespaceSystem)
 	deployments, err := deploymentsClient.List(context.TODO(), metav1.ListOptions{LabelSelector: "k8s-app=kube-dns"})
 	if err != nil {
-		return &replicas, errors.Wrap(err, "couldn't retrieve DNS addon deployments")
+		return &replicas, errors.Wrap(err, "无法检索域名系统插件部署")
 	}
 	switch len(deployments.Items) {
 	case 0:
@@ -86,7 +86,7 @@ func deployedDNSReplicas(client clientset.Interface, replicas int32) (*int32, er
 	}
 }
 
-// EnsureDNSAddon creates the CoreDNS addon
+// EnsureDNSAddon 创建一个CoreDNS的addon
 func EnsureDNSAddon(cfg *kubeadmapi.ClusterConfiguration, client clientset.Interface) error {
 	replicas, err := deployedDNSReplicas(client, coreDNSReplicas)
 	if err != nil {
@@ -96,7 +96,7 @@ func EnsureDNSAddon(cfg *kubeadmapi.ClusterConfiguration, client clientset.Inter
 }
 
 func coreDNSAddon(cfg *kubeadmapi.ClusterConfiguration, client clientset.Interface, replicas *int32) error {
-	// Get the YAML manifest
+	// 拿到YAML的清单
 	coreDNSDeploymentBytes, err := kubeadmutil.ParseTemplate(CoreDNSDeployment, struct {
 		DeploymentName, Image, OldControlPlaneTaintKey, ControlPlaneTaintKey string
 		Replicas                                                             *int32
@@ -136,7 +136,7 @@ func coreDNSAddon(cfg *kubeadmapi.ClusterConfiguration, client clientset.Interfa
 	if err := createCoreDNSAddon(coreDNSDeploymentBytes, coreDNSServiceBytes, coreDNSConfigMapBytes, client); err != nil {
 		return err
 	}
-	fmt.Println("[addons] Applied essential addon: CoreDNS")
+	fmt.Println("[addons] 应用基本插件: CoreDNS")
 	return nil
 }
 

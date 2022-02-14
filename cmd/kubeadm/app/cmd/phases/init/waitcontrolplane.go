@@ -64,7 +64,7 @@ var (
 	`)))
 )
 
-// NewWaitControlPlanePhase is a hidden phase that runs after the control-plane and etcd phases
+// NewWaitControlPlanePhase 是在控制平面和etcd阶段之后运行的隐藏阶段
 func NewWaitControlPlanePhase() workflow.Phase {
 	phase := workflow.Phase{
 		Name:   "wait-control-plane",
@@ -74,23 +74,24 @@ func NewWaitControlPlanePhase() workflow.Phase {
 	return phase
 }
 
+// 创建一个Waiter然后执行WaitForKubeletAndFunc, 从预定义的常量读取超时, 超时以后则API Server挂了
 func runWaitControlPlanePhase(c workflow.RunData) error {
 	data, ok := c.(InitData)
 	if !ok {
-		return errors.New("wait-control-plane phase invoked with an invalid data struct")
+		return errors.New("wait-control-plane阶段使用无效的数据结构")
 	}
 
-	// If we're dry-running, print the generated manifests
+	// 如果我们在试运行，打印生成的清单
 	if err := printFilesIfDryRunning(data); err != nil {
-		return errors.Wrap(err, "error printing files on dryrun")
+		return errors.Wrap(err, "在试运行上打印文件时出错")
 	}
 
 	// waiter holds the apiclient.Waiter implementation of choice, responsible for querying the API server in various ways and waiting for conditions to be fulfilled
-	klog.V(1).Infoln("[wait-control-plane] Waiting for the API server to be healthy")
+	klog.V(1).Infoln("[wait-control-plane] 等待API Server正常运行")
 
 	client, err := data.Client()
 	if err != nil {
-		return errors.Wrap(err, "cannot obtain client")
+		return errors.Wrap(err, "无法获取客户端")
 	}
 
 	timeout := data.Cfg().ClusterConfiguration.APIServer.TimeoutForControlPlane.Duration
@@ -99,7 +100,7 @@ func runWaitControlPlanePhase(c workflow.RunData) error {
 		return errors.Wrap(err, "error creating waiter")
 	}
 
-	fmt.Printf("[wait-control-plane] Waiting for the kubelet to boot up the control plane as static Pods from directory %q. This can take up to %v\n", data.ManifestDir(), timeout)
+	fmt.Printf("[wait-control-plane] 等待kubelet从目录中以静态Pods的形式启动控制平面 %q. 这可能需要 %v\n", data.ManifestDir(), timeout)
 
 	if err := waiter.WaitForKubeletAndFunc(waiter.WaitForAPI); err != nil {
 		context := struct {
@@ -112,8 +113,9 @@ func runWaitControlPlanePhase(c workflow.RunData) error {
 			IsDocker: data.Cfg().NodeRegistration.CRISocket == kubeadmconstants.DefaultDockerCRISocket,
 		}
 
-		kubeletFailTempl.Execute(data.OutputWriter(), context)
-		return errors.New("couldn't initialize a Kubernetes cluster")
+		// 使用template库渲染错误信息
+		_ = kubeletFailTempl.Execute(data.OutputWriter(), context)
+		return errors.New("无法初始化Kubernetes群集")
 	}
 
 	return nil
@@ -149,7 +151,7 @@ func printFilesIfDryRunning(data InitData) error {
 	return dryrunutil.PrintDryRunFiles(files, data.OutputWriter())
 }
 
-// newControlPlaneWaiter returns a new waiter that is used to wait on the control plane to boot up.
+// newControlPlaneWaiter 返回一个新的Waiter，用于等待控制平面启动。
 func newControlPlaneWaiter(dryRun bool, timeout time.Duration, client clientset.Interface, out io.Writer) (apiclient.Waiter, error) {
 	if dryRun {
 		return dryrunutil.NewWaiter(), nil

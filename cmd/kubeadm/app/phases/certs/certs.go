@@ -71,29 +71,28 @@ func CreatePKIAssets(cfg *kubeadmapi.InitConfiguration) error {
 	return CreateServiceAccountKeyAndPublicKeyFiles(cfg.CertificatesDir, cfg.ClusterConfiguration.PublicKeyAlgorithm())
 }
 
-// CreateServiceAccountKeyAndPublicKeyFiles creates new public/private key files for signing service account users.
-// If the sa public/private key files already exist in the target folder, they are used only if evaluated equals; otherwise an error is returned.
+// CreateServiceAccountKeyAndPublicKeyFiles 为签名服务帐户用户创建新的公钥/私钥文件。
+// 如果sa公钥/私钥文件已经存在于目标文件夹中，则仅当计算结果等于时才使用它们；否则将返回一个错误。
 func CreateServiceAccountKeyAndPublicKeyFiles(certsDir string, keyType x509.PublicKeyAlgorithm) error {
 	klog.V(1).Infoln("creating new public/private key files for signing service account users")
 	_, err := keyutil.PrivateKeyFromFile(filepath.Join(certsDir, kubeadmconstants.ServiceAccountPrivateKeyName))
 	if err == nil {
-		// kubeadm doesn't validate the existing certificate key more than this;
-		// Basically, if we find a key file with the same path kubeadm thinks those files
-		// are equal and doesn't bother writing a new file
-		fmt.Printf("[certs] Using the existing %q key\n", kubeadmconstants.ServiceAccountKeyBaseName)
+		// kubeadm验证现有证书密钥的次数不超过此次数；
+		// 基本上，如果我们找到一个具有相同路径的密钥文件，kubeadm认为这些文件是相等的，并且不需要写新文件
+		fmt.Printf("[证书] 使用已经存在的 %q 秘钥\n", kubeadmconstants.ServiceAccountKeyBaseName)
 		return nil
 	} else if !os.IsNotExist(err) {
-		return errors.Wrapf(err, "file %s existed but it could not be loaded properly", kubeadmconstants.ServiceAccountPrivateKeyName)
+		return errors.Wrapf(err, "文件 %s 存在，但无法正确加载", kubeadmconstants.ServiceAccountPrivateKeyName)
 	}
 
-	// The key does NOT exist, let's generate it now
+	// 密钥不存在，让我们现在生成它
 	key, err := pkiutil.NewPrivateKey(keyType)
 	if err != nil {
 		return err
 	}
 
-	// Write .key and .pub files to disk
-	fmt.Printf("[certs] Generating %q key and public key\n", kubeadmconstants.ServiceAccountKeyBaseName)
+	// 将 .key 和 .pub 文件写到磁盘
+	fmt.Printf("[证书] 生成 %q 私钥和公钥\n", kubeadmconstants.ServiceAccountKeyBaseName)
 
 	if err := pkiutil.WriteKey(certsDir, kubeadmconstants.ServiceAccountKeyBaseName, key); err != nil {
 		return err
@@ -102,13 +101,13 @@ func CreateServiceAccountKeyAndPublicKeyFiles(certsDir string, keyType x509.Publ
 	return pkiutil.WritePublicKey(certsDir, kubeadmconstants.ServiceAccountKeyBaseName, key.Public())
 }
 
-// CreateCACertAndKeyFiles generates and writes out a given certificate authority.
-// The certSpec should be one of the variables from this package.
+// CreateCACertAndKeyFiles 生成并写出给定的证书颁发机构。
+// certSpec应该是这个包中的变量之一。
 func CreateCACertAndKeyFiles(certSpec *KubeadmCert, cfg *kubeadmapi.InitConfiguration) error {
 	if certSpec.CAName != "" {
-		return errors.Errorf("this function should only be used for CAs, but cert %s has CA %s", certSpec.Name, certSpec.CAName)
+		return errors.Errorf("该功能只能用于CA, 但是证书 %s 拥有CA %s", certSpec.Name, certSpec.CAName)
 	}
-	klog.V(1).Infof("creating a new certificate authority for %s", certSpec.Name)
+	klog.V(1).Infof("为创建新的证书颁发机构 %s", certSpec.Name)
 
 	certConfig, err := certSpec.GetConfig(cfg)
 	if err != nil {
