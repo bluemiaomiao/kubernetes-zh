@@ -25,8 +25,8 @@ import (
 	clientset "k8s.io/client-go/kubernetes"
 )
 
-// InitData is the interface to use for init phases.
-// The "initData" type from "cmd/init.go" must satisfy this interface.
+// InitData 是用于初始化阶段的接口。
+// cmd/init.go中的initData类型必须满足此接口。
 type InitData interface {
 	UploadCerts() bool
 	CertificateKey() string

@@ -1,3 +1,4 @@
+//go:build windows
 // +build windows
 
 /*
@@ -19,6 +20,6 @@ limitations under the License.
 package constants
 
 const (
-	// DefaultDockerCRISocket defines the default Docker CRI socket
+	// DefaultDockerCRISocket 定义默认的Docker CRI套接字
 	DefaultDockerCRISocket = "npipe:////./pipe/docker_engine"
 )

@@ -44,7 +44,7 @@ type InitConfiguration struct {
 	// BootstrapTokens is respected at `kubeadm init` time and describes a set of Bootstrap Tokens to create.
 	BootstrapTokens []bootstraptokenv1.BootstrapToken
 
-	// NodeRegistration holds fields that relate to registering the new control-plane node to the cluster
+	// NodeRegistration 保存与向集群注册新控制平面节点相关的字段
 	NodeRegistration NodeRegistrationOptions
 
 	// LocalAPIEndpoint represents the endpoint of the API server instance that's deployed on this control plane node
@@ -191,102 +191,97 @@ type ImageMeta struct {
 	//TODO: evaluate if we need also a ImageName based on user feedbacks
 }
 
-// APIEndpoint struct contains elements of API server instance deployed on a node.
+// APIEndpoint 结构包含部署在节点上的API服务器实例的元素。
 type APIEndpoint struct {
-	// AdvertiseAddress sets the IP address for the API server to advertise.
+	// AdvertiseAddress 设置API Server通告的IP地址。
 	AdvertiseAddress string
 
-	// BindPort sets the secure port for the API Server to bind to.
-	// Defaults to 6443.
+	// BindPort 设置API Server绑定到的安全端口。
+	// 默认是 6443.
 	BindPort int32
 }
 
-// NodeRegistrationOptions holds fields that relate to registering a new control-plane or node to the cluster, either via "kubeadm init" or "kubeadm join"
+// NodeRegistrationOptions 保存通过kubeadm init或kubeadm join向集群注册新的控制平面或节点相关的字段
 type NodeRegistrationOptions struct {
 
-	// Name is the `.Metadata.Name` field of the Node API object that will be created in this `kubeadm init` or `kubeadm join` operation.
-	// This field is also used in the CommonName field of the kubelet's client certificate to the API server.
-	// Defaults to the hostname of the node if not provided.
+	// Name 是将在此kubeadm init或kubeadm join操作中创建的节点应用编程接口对象的.Metadata.Name字段。
+	// 该字段也用在kubelet到API服务器的客户端证书的CommonName字段中。如果未提供，则默认为节点的主机名。
 	Name string
 
-	// CRISocket is used to retrieve container runtime info. This information will be annotated to the Node API object, for later re-use
+	// CRISocket 用于检索容器运行时信息。这些信息将被注释到节点API对象中，以便以后重用
 	CRISocket string
 
-	// Taints specifies the taints the Node API object should be registered with. If this field is unset, i.e. nil, in the `kubeadm init` process
-	// it will be defaulted to []v1.Taint{'node-role.kubernetes.io/master=""'}. If you don't want to taint your control-plane node, set this field to an
-	// empty slice, i.e. `taints: []` in the YAML file. This field is solely used for Node registration.
+	// Taints 指定节点API对象应该注册的污点。如果该字段没有被这是，即无。在kubeadm init过程中，它将默认为[]v1.Taint{'node-role.kubernetes.io/master=""'}。
+	// 如果您不想污染您的控制平面节点，请将此字段设置为空切片，即YAML文件中的taints: []。此字段仅用于节点注册。
 	Taints []v1.Taint
 
-	// KubeletExtraArgs passes through extra arguments to the kubelet. The arguments here are passed to the kubelet command line via the environment file
-	// kubeadm writes at runtime for the kubelet to source. This overrides the generic base-level configuration in the kubelet-config-1.X ConfigMap
-	// Flags have higher priority when parsing. These values are local and specific to the node kubeadm is executing on.
-	// A key in this map is the flag name as it appears on the
-	// command line except without leading dash(es).
+	// KubeletExtraArgs 将额外的参数传递给kubelet。
+	// 这里的参数在运行时通过环境文件kubeadm writes传递给kubelet命令行，以使kubelet成为源。这将会覆盖在kubelet-config-1.X ConfigMap中的基本配置
+	// 解析时，标志具有更高的优先级。这些值是本地的，并且特定于kubeadm正在其上执行的节点。
+	// 此Map中的一个键是命令行中出现的标志名，除了不带破折号的。
 	KubeletExtraArgs map[string]string
 
-	// IgnorePreflightErrors provides a slice of pre-flight errors to be ignored when the current node is registered.
+	// IgnorePreflightErrors 提供在注册当前节点时要忽略的一部分预检错误。
 	IgnorePreflightErrors []string
 
-	// ImagePullPolicy specifies the policy for image pulling during kubeadm "init" and "join" operations.
-	// The value of this field must be one of "Always", "IfNotPresent" or "Never".
-	// If this field is unset kubeadm will default it to "IfNotPresent", or pull the required images if not present on the host.
+	// ImagePullPolicy 指定kubeadm init 和kubeadm join期间的镜像拉取策略
+	// 值必须是Always, IfNotPresent或者Never
+	// 如果此字段未设置，kubeadm会将其默认为“IfNotPresent”，或者如果主机上没有所需的镜像，则提取所需的镜像。
 	ImagePullPolicy v1.PullPolicy `json:"imagePullPolicy,omitempty"`
 }
 
-// Networking contains elements describing cluster's networking configuration.
+// Networking 包含描述群集网络配置的元素。
 type Networking struct {
-	// ServiceSubnet is the subnet used by k8s services. Defaults to "10.96.0.0/12".
+	// ServiceSubnet 是k8s服务使用的子网。默认为10.96.0.0/12
 	ServiceSubnet string
-	// PodSubnet is the subnet used by pods.
+	// PodSubnet 是Pod使用的子网。
 	PodSubnet string
-	// DNSDomain is the dns domain used by k8s services. Defaults to "cluster.local".
+	// DNSDomain 是k8s服务使用的DNS域。默认为cluster.local
 	DNSDomain string
 }
 
-// Etcd contains elements describing Etcd configuration.
+// Etcd 包含描述Etcd配置的元素。
 type Etcd struct {
 
-	// Local provides configuration knobs for configuring the local etcd instance
-	// Local and External are mutually exclusive
+	// Local 提供用于配置本地etcd实例的配置
+	// Local 和 External 是互斥的
 	Local *LocalEtcd
 
-	// External describes how to connect to an external etcd cluster
-	// Local and External are mutually exclusive
+	// External 描述如何连接到外部etcd群集
+	// Local 和 External 是互斥的
 	External *ExternalEtcd
 }
 
-// LocalEtcd describes that kubeadm should run an etcd cluster locally
+// LocalEtcd 描述kubeadm应该在本地运行etcd集群
 type LocalEtcd struct {
-	// ImageMeta allows to customize the container used for etcd
+	// ImageMeta 允许自定义用于etcd的容器
 	ImageMeta `json:",inline"`
 
-	// DataDir is the directory etcd will place its data.
-	// Defaults to "/var/lib/etcd".
+	// DataDir etcd将放置其数据的目录。
+	// 默认是"/var/lib/etcd".
 	DataDir string
 
-	// ExtraArgs are extra arguments provided to the etcd binary
-	// when run inside a static pod.
-	// A key in this map is the flag name as it appears on the
-	// command line except without leading dash(es).
+	// ExtraArgs 是在静态Pod中运行时提供给etcd二进制文件的额外参数。
+	// 此映射中的一个键是命令行中出现的标志名，除了不带破折号。
 	ExtraArgs map[string]string
 
-	// ServerCertSANs sets extra Subject Alternative Names for the etcd server signing cert.
+	// ServerCertSANs 为etcd服务器签名证书设置额外的主题替代名称。
 	ServerCertSANs []string
-	// PeerCertSANs sets extra Subject Alternative Names for the etcd peer signing cert.
+	// PeerCertSANs 为etcd对等签名证书设置额外的主题替代名称。
 	PeerCertSANs []string
 }
 
-// ExternalEtcd describes an external etcd cluster
+// ExternalEtcd 描述外部etcd集群
 type ExternalEtcd struct {
 
-	// Endpoints of etcd members. Useful for using external etcd.
-	// If not provided, kubeadm will run etcd in a static pod.
+	// Endpoints etcd成员。对于使用外部etcd很有用。
+	// 如果没有提供，kubeadm将在静态Pod中运行etcd。
 	Endpoints []string
-	// CAFile is an SSL Certificate Authority file used to secure etcd communication.
+	// CAFile 是一个用于保护etcd通信的SSL证书颁发机构文件。
 	CAFile string
-	// CertFile is an SSL certification file used to secure etcd communication.
+	// CertFile 是用于保护etcd通信安全的SSL证书文件。
 	CertFile string
-	// KeyFile is an SSL key file used to secure etcd communication.
+	// KeyFile 是用于保护etcd通信的SSL密钥文件。
 	KeyFile string
 }
 

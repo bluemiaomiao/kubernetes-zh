@@ -29,7 +29,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// ContainerRuntime is an interface for working with container runtimes
+// ContainerRuntime 是一个使用容器运行时的接口
 type ContainerRuntime interface {
 	IsDocker() bool
 	IsRunning() error
@@ -39,27 +39,27 @@ type ContainerRuntime interface {
 	ImageExists(image string) (bool, error)
 }
 
-// CRIRuntime is a struct that interfaces with the CRI
+// CRIRuntime 是一个与CRI接口的结构
 type CRIRuntime struct {
 	exec      utilsexec.Interface
 	criSocket string
 }
 
-// DockerRuntime is a struct that interfaces with the Docker daemon
+// DockerRuntime 是一个与Docker守护程序接口的结构
 type DockerRuntime struct {
 	exec utilsexec.Interface
 }
 
-// NewContainerRuntime sets up and returns a ContainerRuntime struct
+// NewContainerRuntime 设置并返回一个ContainerRuntime结构
 func NewContainerRuntime(execer utilsexec.Interface, criSocket string) (ContainerRuntime, error) {
 	var toolName string
 	var runtime ContainerRuntime
 
 	if criSocket != constants.DefaultDockerCRISocket {
 		toolName = "crictl"
-		// !!! temporary work around crictl warning:
-		// Using "/var/run/crio/crio.sock" as endpoint is deprecated,
-		// please consider using full url format "unix:///var/run/crio/crio.sock"
+		// 不推荐使用/var/run/crio/crio.sock作为端点，
+		// 请考虑使用完整的url格式 "unix:///var/run/crio/crio.sock"
+		// 如果CRI Socket文件的路径是没问题的并且运行在非Windows系统上就返回unix://协议的链接
 		if filepath.IsAbs(criSocket) && goruntime.GOOS != "windows" {
 			criSocket = "unix://" + criSocket
 		}
@@ -70,34 +70,34 @@ func NewContainerRuntime(execer utilsexec.Interface, criSocket string) (Containe
 	}
 
 	if _, err := execer.LookPath(toolName); err != nil {
-		return nil, errors.Wrapf(err, "%s is required for container runtime", toolName)
+		return nil, errors.Wrapf(err, "%s 对于容器运行时是必需的", toolName)
 	}
 
 	return runtime, nil
 }
 
-// IsDocker returns true if the runtime is docker
+// IsDocker 如果运行库是docker，则返回true
 func (runtime *CRIRuntime) IsDocker() bool {
 	return false
 }
 
-// IsDocker returns true if the runtime is docker
+// IsDocker 如果运行库是docker，则返回true
 func (runtime *DockerRuntime) IsDocker() bool {
 	return true
 }
 
-// IsRunning checks if runtime is running
+// IsRunning 检查运行时是否正在运行
 func (runtime *CRIRuntime) IsRunning() error {
 	if out, err := runtime.exec.Command("crictl", "-r", runtime.criSocket, "info").CombinedOutput(); err != nil {
-		return errors.Wrapf(err, "container runtime is not running: output: %s, error", string(out))
+		return errors.Wrapf(err, "容器运行时未运行: 输出: %s, 错误", string(out))
 	}
 	return nil
 }
 
-// IsRunning checks if runtime is running
+// IsRunning 检查运行时是否正在运行
 func (runtime *DockerRuntime) IsRunning() error {
 	if out, err := runtime.exec.Command("docker", "info").CombinedOutput(); err != nil {
-		return errors.Wrapf(err, "container runtime is not running: output: %s, error", string(out))
+		return errors.Wrapf(err, "容器运行时未运行: 输出: %s, 错误", string(out))
 	}
 	return nil
 }

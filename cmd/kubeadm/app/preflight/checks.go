@@ -84,19 +84,18 @@ func (e *Error) Preflight() bool {
 	return true
 }
 
-// Checker validates the state of the system to ensure kubeadm will be
-// successful as often as possible.
+// Checker 验证系统状态，以确保kubeadm尽可能地成功。
 type Checker interface {
 	Check() (warnings, errorList []error)
 	Name() string
 }
 
-// ContainerRuntimeCheck verifies the container runtime.
+// ContainerRuntimeCheck 验证容器运行时
 type ContainerRuntimeCheck struct {
 	runtime utilruntime.ContainerRuntime
 }
 
-// Name returns label for RuntimeCheck.
+// Name 为 RuntimeCheck 返回名称
 func (ContainerRuntimeCheck) Name() string {
 	return "CRI"
 }
@@ -110,9 +109,8 @@ func (crc ContainerRuntimeCheck) Check() (warnings, errorList []error) {
 	return warnings, errorList
 }
 
-// ServiceCheck verifies that the given service is enabled and active. If we do not
-// detect a supported init system however, all checks are skipped and a warning is
-// returned.
+// ServiceCheck 验证给定服务是否已启用并处于活动状态。
+// 但是如果我们没有检测到受支持的初始化系统，则会跳过所有检查并返回警告。
 type ServiceCheck struct {
 	Service       string
 	CheckIfActive bool
@@ -186,7 +184,7 @@ func (fc FirewalldCheck) Check() (warnings, errorList []error) {
 	return nil, nil
 }
 
-// PortOpenCheck ensures the given port is available for use.
+// PortOpenCheck 确保给定端口可供使用。
 type PortOpenCheck struct {
 	port  int
 	label string
@@ -218,15 +216,15 @@ func (poc PortOpenCheck) Check() (warnings, errorList []error) {
 	return warnings, errorList
 }
 
-// IsPrivilegedUserCheck verifies user is privileged (linux - root, windows - Administrator)
+// IsPrivilegedUserCheck 验证用户是否有特权 (Linux系统是root用户, Windows系统是Administrator用户)
 type IsPrivilegedUserCheck struct{}
 
-// Name returns name for IsPrivilegedUserCheck
+// Name 为 IsPrivilegedUserCheck 返回名称
 func (IsPrivilegedUserCheck) Name() string {
 	return "IsPrivilegedUser"
 }
 
-// DirAvailableCheck checks if the given directory either does not exist, or is empty.
+// DirAvailableCheck 检查给定的目录是不存在还是为空。
 type DirAvailableCheck struct {
 	Path  string
 	Label string
@@ -263,7 +261,7 @@ func (dac DirAvailableCheck) Check() (warnings, errorList []error) {
 	return nil, nil
 }
 
-// FileAvailableCheck checks that the given file does not already exist.
+// FileAvailableCheck 检查给定的文件是否已经不存在。
 type FileAvailableCheck struct {
 	Path  string
 	Label string
@@ -311,7 +309,7 @@ func (fac FileExistingCheck) Check() (warnings, errorList []error) {
 	return nil, nil
 }
 
-// FileContentCheck checks that the given file contains the string Content.
+// FileContentCheck 检查给定文件是否包含字符串Content。
 type FileContentCheck struct {
 	Path    string
 	Content []byte
@@ -350,7 +348,7 @@ func (fcc FileContentCheck) Check() (warnings, errorList []error) {
 
 }
 
-// InPathCheck checks if the given executable is present in $PATH
+// InPathCheck 检查给定的可执行文件是否存在于$PATH中
 type InPathCheck struct {
 	executable string
 	mandatory  bool
@@ -386,13 +384,13 @@ func (ipc InPathCheck) Check() (warnings, errs []error) {
 	return nil, nil
 }
 
-// HostnameCheck checks if hostname match dns sub domain regex.
-// If hostname doesn't match this regex, kubelet will not launch static pods like kube-apiserver/kube-controller-manager and so on.
+// HostnameCheck 检查主机名是否与DNS子域正则匹配。
+// 如果主机名与这个正则表达式不匹配，kubelet将不会启动像kube-apiserver/kube-controller-manager这样的静态Pod。
 type HostnameCheck struct {
 	nodeName string
 }
 
-// Name will return Hostname as name for HostnameCheck
+// Name 为 HostnameCheck 返回名称 Hostname
 func (HostnameCheck) Name() string {
 	return "Hostname"
 }
@@ -415,8 +413,7 @@ func (hc HostnameCheck) Check() (warnings, errorList []error) {
 	return warnings, errorList
 }
 
-// HTTPProxyCheck checks if https connection to specific host is going
-// to be done directly or over proxy. If proxy detected, it will return warning.
+// HTTPProxyCheck 检查到特定主机的HTTPS连接是直接连接还是通过代理连接。如果检测到代理，它将返回警告。
 type HTTPProxyCheck struct {
 	Proto string
 	Host  string
@@ -450,11 +447,8 @@ func (hst HTTPProxyCheck) Check() (warnings, errorList []error) {
 	return nil, nil
 }
 
-// HTTPProxyCIDRCheck checks if https connection to specific subnet is going
-// to be done directly or over proxy. If proxy detected, it will return warning.
-// Similar to HTTPProxyCheck above, but operates with subnets and uses API
-// machinery transport defaults to simulate kube-apiserver accessing cluster
-// services and pods.
+// HTTPProxyCIDRCheck 检查到特定子网的HTTPS连接是直接连接还是通过代理连接。如果检测到代理，它将返回警告。
+// 类似于上面的HTTPProxyCheck，但是使用子网操作，并使用API手动传输默认值来模拟kube-apiserver访问集群服务和Pod。
 type HTTPProxyCIDRCheck struct {
 	Proto string
 	CIDR  string
@@ -505,12 +499,12 @@ func (subnet HTTPProxyCIDRCheck) Check() (warnings, errorList []error) {
 	return nil, nil
 }
 
-// SystemVerificationCheck defines struct used for running the system verification node check in test/e2e_node/system
+// SystemVerificationCheck 定义用于在test/e2e_node/system中运行系统验证节点检查的结构
 type SystemVerificationCheck struct {
 	IsDocker bool
 }
 
-// Name will return SystemVerification as name for SystemVerificationCheck
+// Name 为 SystemVerificationCheck 返回名称 SystemVerification
 func (SystemVerificationCheck) Name() string {
 	return "SystemVerification"
 }
@@ -561,7 +555,7 @@ func (sysver SystemVerificationCheck) Check() (warnings, errorList []error) {
 	return warns, nil
 }
 
-// KubernetesVersionCheck validates Kubernetes and kubeadm versions
+// KubernetesVersionCheck 验证Kubernetes和kubeadm版本
 type KubernetesVersionCheck struct {
 	KubeadmVersion    string
 	KubernetesVersion string
@@ -602,13 +596,13 @@ func (kubever KubernetesVersionCheck) Check() (warnings, errorList []error) {
 	return nil, nil
 }
 
-// KubeletVersionCheck validates installed kubelet version
+// KubeletVersionCheck 验证已安装的kubelet版本
 type KubeletVersionCheck struct {
 	KubernetesVersion string
 	exec              utilsexec.Interface
 }
 
-// Name will return KubeletVersion as name for KubeletVersionCheck
+// Name 为 KubeletVersionCheck 返回名称 KubeletVersion
 func (KubeletVersionCheck) Name() string {
 	return "KubeletVersion"
 }
@@ -636,34 +630,38 @@ func (kubever KubeletVersionCheck) Check() (warnings, errorList []error) {
 	return nil, nil
 }
 
-// SwapCheck warns if swap is enabled
+// SwapCheck 如果内存Swap开启, 那么打印警告
 type SwapCheck struct{}
 
-// Name will return Swap as name for SwapCheck
+// Name 为 SwapCheck 返回Swap
 func (SwapCheck) Name() string {
 	return "Swap"
 }
 
-// Check validates whether swap is enabled or not
+// Check 验证Swap功能是否已启用
 func (swc SwapCheck) Check() (warnings, errorList []error) {
-	klog.V(1).Infoln("validating whether swap is enabled or not")
+	klog.V(1).Infoln("验证内存Swap是否已启用")
 	f, err := os.Open("/proc/swaps")
 	if err != nil {
 		// /proc/swaps not available, thus no reasons to warn
 		return nil, nil
 	}
-	defer f.Close()
+
+	// defer f.Close()
+	defer func(f *os.File) {
+		_ = f.Close()
+	}(f)
 	var buf []string
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		buf = append(buf, scanner.Text())
 	}
 	if err := scanner.Err(); err != nil {
-		return nil, []error{errors.Wrap(err, "error parsing /proc/swaps")}
+		return nil, []error{errors.Wrap(err, "/proc/swaps 文件解析错误")}
 	}
 
 	if len(buf) > 1 {
-		return nil, []error{errors.New("running with swap on is not supported. Please disable swap")}
+		return nil, []error{errors.New("不支持在内存Swap开启的模式下运行。请禁用内存Swap")}
 	}
 
 	return nil, nil
@@ -674,12 +672,12 @@ type etcdVersionResponse struct {
 	Etcdcluster string `json:"etcdcluster"`
 }
 
-// ExternalEtcdVersionCheck checks if version of external etcd meets the demand of kubeadm
+// ExternalEtcdVersionCheck 检查外部etcd的版本是否满足kubeadm的需求
 type ExternalEtcdVersionCheck struct {
 	Etcd kubeadmapi.Etcd
 }
 
-// Name will return ExternalEtcdVersion as name for ExternalEtcdVersionCheck
+// Name 返回 ExternalEtcdVersionCheck 的名称 ExternalEtcdVersion
 func (ExternalEtcdVersionCheck) Name() string {
 	return "ExternalEtcdVersion"
 }
@@ -865,7 +863,7 @@ func (ipc ImagePullCheck) Check() (warnings, errorList []error) {
 	return warnings, errorList
 }
 
-// NumCPUCheck checks if current number of CPUs is not less than required
+// NumCPUCheck 检查当前的CPU数量是否不低于要求
 type NumCPUCheck struct {
 	NumCPU int
 }
@@ -894,66 +892,78 @@ func (MemCheck) Name() string {
 	return "Mem"
 }
 
-// RunInitNodeChecks executes all individual, applicable to control-plane node checks.
-// The boolean flag 'isSecondaryControlPlane' controls whether we are running checks in a --join-control-plane scenario.
-// The boolean flag 'downloadCerts' controls whether we should skip checks on certificates because we are downloading them.
-// If the flag is set to true we should skip checks already executed by RunJoinNodeChecks.
+// RunInitNodeChecks 执行所有适用于控制平面节点检查的单独检查。
+// 布尔值标志 'isSecondaryControlPlane' 控制是否在 --join-control-plane 场景下执行检查.
+// 布尔值标志 'downloadCerts' 控制我们是否应该跳过对证书的检查，因为我们正在下载它们。
+// 如果标志为真, 我们应该跳过 RunJoinNodeChecks 已经执行的检查
 func RunInitNodeChecks(execer utilsexec.Interface, cfg *kubeadmapi.InitConfiguration, ignorePreflightErrors sets.String, isSecondaryControlPlane bool, downloadCerts bool) error {
 	if !isSecondaryControlPlane {
-		// First, check if we're root separately from the other preflight checks and fail fast
+		// 首先，检查我们是否独立于其他预检检查并快速失败
 		if err := RunRootCheckOnly(ignorePreflightErrors); err != nil {
 			return err
 		}
 	}
 
+	// 获取到清单文件的绝对目录
 	manifestsDir := filepath.Join(kubeadmconstants.KubernetesDir, kubeadmconstants.ManifestsSubDirName)
 	checks := []Checker{
 		NumCPUCheck{NumCPU: kubeadmconstants.ControlPlaneNumCPU},
-		// Linux only
-		// TODO: support other OS, if control-plane is supported on it.
+		// 只有Linux
+		// TODO: 支持其他操作系统，如果它支持控制平面的话
+		// 检查节点的内存大小
 		MemCheck{Mem: kubeadmconstants.ControlPlaneMem},
+		// 检查Kubernetes版本和kubeadm的版本是否存在冲突
 		KubernetesVersionCheck{KubernetesVersion: cfg.KubernetesVersion, KubeadmVersion: kubeadmversion.Get().GitVersion},
+		// 检查所需要的端口是否被墙了
 		FirewalldCheck{ports: []int{int(cfg.LocalAPIEndpoint.BindPort), kubeadmconstants.KubeletPort}},
+		// 检查端口是否打开
 		PortOpenCheck{port: int(cfg.LocalAPIEndpoint.BindPort)},
 		PortOpenCheck{port: kubeadmconstants.KubeSchedulerPort},
 		PortOpenCheck{port: kubeadmconstants.KubeControllerManagerPort},
+		// 检查静态Pod的YAML文件是否可用
 		FileAvailableCheck{Path: kubeadmconstants.GetStaticPodFilepath(kubeadmconstants.KubeAPIServer, manifestsDir)},
 		FileAvailableCheck{Path: kubeadmconstants.GetStaticPodFilepath(kubeadmconstants.KubeControllerManager, manifestsDir)},
 		FileAvailableCheck{Path: kubeadmconstants.GetStaticPodFilepath(kubeadmconstants.KubeScheduler, manifestsDir)},
 		FileAvailableCheck{Path: kubeadmconstants.GetStaticPodFilepath(kubeadmconstants.Etcd, manifestsDir)},
+		// 检查连接到API Server的HTTPS链接是直连还是走代理
 		HTTPProxyCheck{Proto: "https", Host: cfg.LocalAPIEndpoint.AdvertiseAddress},
 	}
+
 	cidrs := strings.Split(cfg.Networking.ServiceSubnet, ",")
 	for _, cidr := range cidrs {
 		checks = append(checks, HTTPProxyCIDRCheck{Proto: "https", CIDR: cidr})
 	}
+
 	cidrs = strings.Split(cfg.Networking.PodSubnet, ",")
 	for _, cidr := range cidrs {
 		checks = append(checks, HTTPProxyCIDRCheck{Proto: "https", CIDR: cidr})
 	}
 
 	if !isSecondaryControlPlane {
+		// 一些其他的杂七杂八的检查
 		checks = addCommonChecks(execer, cfg.KubernetesVersion, &cfg.NodeRegistration, checks)
 
-		// Check if Bridge-netfilter and IPv6 relevant flags are set
+		// 检查是否设置了网桥过滤器和IPv6相关标志
 		if ip := net.ParseIP(cfg.LocalAPIEndpoint.AdvertiseAddress); ip != nil {
+			// 如果是IPv6地址的话，还得增加其他的检查
 			if utilsnet.IsIPv6(ip) {
 				checks = append(checks,
+					// 检查指定的文件中是否包含指定的内容
 					FileContentCheck{Path: bridgenf6, Content: []byte{'1'}},
 					FileContentCheck{Path: ipv6DefaultForwarding, Content: []byte{'1'}},
 				)
 			}
 		}
 
-		// if using an external etcd
+		// 如果使用外部etcd
 		if cfg.Etcd.External != nil {
-			// Check external etcd version before creating the cluster
+			// 在创建集群之前，请检查外部etcd的版本
 			checks = append(checks, ExternalEtcdVersionCheck{Etcd: cfg.Etcd})
 		}
 	}
 
 	if cfg.Etcd.Local != nil {
-		// Only do etcd related checks when required to install a local etcd
+		// 仅在需要安装本地etcd时进行etcd相关检查
 		checks = append(checks,
 			PortOpenCheck{port: kubeadmconstants.EtcdListenClientPort},
 			PortOpenCheck{port: kubeadmconstants.EtcdListenPeerPort},
@@ -962,7 +972,7 @@ func RunInitNodeChecks(execer utilsexec.Interface, cfg *kubeadmapi.InitConfigura
 	}
 
 	if cfg.Etcd.External != nil && !(isSecondaryControlPlane && downloadCerts) {
-		// Only check etcd certificates when using an external etcd and not joining with automatic download of certs
+		// 仅在使用外部etcd时检查etcd证书，不加入certs的自动下载
 		if cfg.Etcd.External.CAFile != "" {
 			checks = append(checks, FileExistingCheck{Path: cfg.Etcd.External.CAFile, Label: "ExternalEtcdClientCertificates"})
 		}
@@ -1018,30 +1028,35 @@ func RunJoinNodeChecks(execer utilsexec.Interface, cfg *kubeadmapi.JoinConfigura
 	return RunChecks(checks, os.Stderr, ignorePreflightErrors)
 }
 
-// addCommonChecks is a helper function to duplicate checks that are common between both the
-// kubeadm init and join commands
+// addCommonChecks 是一个辅助函数，用于重复 kubeadm init 和 kubeadm join 命令之间常见的检查
+// utilsexec.Interface是包装os/exec的接口。当您想要注入可模拟/可模仿的执行行为时，请使用此方式。
 func addCommonChecks(execer utilsexec.Interface, k8sVersion string, nodeReg *kubeadmapi.NodeRegistrationOptions, checks []Checker) []Checker {
 	containerRuntime, err := utilruntime.NewContainerRuntime(execer, nodeReg.CRISocket)
 	isDocker := false
 	if err != nil {
-		fmt.Printf("[preflight] WARNING: Couldn't create the interface used for talking to the container runtime: %v\n", err)
+		fmt.Printf("[预检] 警告: 无法创建用于与容器运行时对话的接口: %v\n", err)
 	} else {
 		checks = append(checks, ContainerRuntimeCheck{runtime: containerRuntime})
+		// 检查Docker服务有没有启动
 		if containerRuntime.IsDocker() {
 			isDocker = true
 			checks = append(checks, ServiceCheck{Service: "docker", CheckIfActive: true})
 		}
 	}
 
-	// non-windows checks
+	// 非Windows系统的检查
 	if runtime.GOOS == "linux" {
 		if !isDocker {
+			// 检查crictl命令是否在PATH环境变量中
 			checks = append(checks, InPathCheck{executable: "crictl", mandatory: true, exec: execer})
 		}
 		checks = append(checks,
+			// 检查Linux文件中是否包含指定的内容
 			FileContentCheck{Path: bridgenf, Content: []byte{'1'}},
 			FileContentCheck{Path: ipv4Forward, Content: []byte{'1'}},
+			// 检查内存Swap是否关闭
 			SwapCheck{},
+			// 检查这些命令是否都在PATH环境变量中
 			InPathCheck{executable: "conntrack", mandatory: true, exec: execer},
 			InPathCheck{executable: "ip", mandatory: true, exec: execer},
 			InPathCheck{executable: "iptables", mandatory: true, exec: execer},
@@ -1062,7 +1077,7 @@ func addCommonChecks(execer utilsexec.Interface, k8sVersion string, nodeReg *kub
 	return checks
 }
 
-// RunRootCheckOnly initializes checks slice of structs and call RunChecks
+// RunRootCheckOnly 初始化检查结构切片并调用 RunChecks
 func RunRootCheckOnly(ignorePreflightErrors sets.String) error {
 	checks := []Checker{
 		IsPrivilegedUserCheck{},
@@ -1084,8 +1099,7 @@ func RunPullImagesCheck(execer utilsexec.Interface, cfg *kubeadmapi.InitConfigur
 	return RunChecks(checks, os.Stderr, ignorePreflightErrors)
 }
 
-// RunChecks runs each check, displays it's warnings/errors, and once all
-// are processed will exit if any errors occurred.
+// RunChecks 运行每一个检查，显示它的警告/错误，如果任何错误发生并且一旦所有的检查被处理将退出。
 func RunChecks(checks []Checker, ww io.Writer, ignorePreflightErrors sets.String) error {
 	var errsBuffer bytes.Buffer
 
@@ -1094,16 +1108,16 @@ func RunChecks(checks []Checker, ww io.Writer, ignorePreflightErrors sets.String
 		warnings, errs := c.Check()
 
 		if setHasItemOrAll(ignorePreflightErrors, name) {
-			// Decrease severity of errors to warnings for this check
+			// 将此检查的错误严重性降低为警告
 			warnings = append(warnings, errs...)
 			errs = []error{}
 		}
 
 		for _, w := range warnings {
-			io.WriteString(ww, fmt.Sprintf("\t[WARNING %s]: %v\n", name, w))
+			_, _ = io.WriteString(ww, fmt.Sprintf("\t[警告 %s]: %v\n", name, w))
 		}
 		for _, i := range errs {
-			errsBuffer.WriteString(fmt.Sprintf("\t[ERROR %s]: %v\n", name, i.Error()))
+			errsBuffer.WriteString(fmt.Sprintf("\t[错误 %s]: %v\n", name, i.Error()))
 		}
 	}
 	if errsBuffer.Len() > 0 {
@@ -1112,10 +1126,10 @@ func RunChecks(checks []Checker, ww io.Writer, ignorePreflightErrors sets.String
 	return nil
 }
 
-// setHasItemOrAll is helper function that return true if item is present in the set (case insensitive) or special key 'all' is present
+// setHasItemOrAll 判断item是否在集合中, 或者特殊的值"all"在集合中
 func setHasItemOrAll(s sets.String, item string) bool {
-	if s.Has("all") || s.Has(strings.ToLower(item)) {
-		return true
-	}
-	return false
+	//if s.Has("all") || s.Has(strings.ToLower(item)) {
+	//	return true
+	//}
+	return s.Has("all") || s.Has(strings.ToLower(item))
 }

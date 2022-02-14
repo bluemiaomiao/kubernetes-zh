@@ -37,9 +37,9 @@ import (
 
 // 定义了默认的运行参数
 const (
-	// KubernetesDir is the directory Kubernetes owns for storing various configuration files
+	// KubernetesDir 是Kubernetes拥有的用于存储各种配置文件的目录
 	KubernetesDir = "/etc/kubernetes"
-	// ManifestsSubDirName defines directory name to store manifests
+	// ManifestsSubDirName 定义存储清单的目录名
 	ManifestsSubDirName = "manifests"
 	// TempDirForKubeadm defines temporary directory for kubeadm
 	// should be joined with KubernetesDir.
@@ -289,19 +289,19 @@ const (
 	// DefaultEtcdVersion indicates the default etcd version that kubeadm uses
 	DefaultEtcdVersion = "3.5.0-0"
 
-	// Etcd defines variable used internally when referring to etcd component
+	// Etcd 定义引用etcd组件时内部使用的变量
 	Etcd = "etcd"
-	// KubeAPIServer defines variable used internally when referring to kube-apiserver component
+	// KubeAPIServer 定义引用kube-apiserver组件时内部使用的变量
 	KubeAPIServer = "kube-apiserver"
-	// KubeControllerManager defines variable used internally when referring to kube-controller-manager component
+	// KubeControllerManager 定义引用kube-controller-manager组件时内部使用的变量
 	KubeControllerManager = "kube-controller-manager"
-	// KubeScheduler defines variable used internally when referring to kube-scheduler component
+	// KubeScheduler 定义引用kube-scheduler组件时内部使用的变量
 	KubeScheduler = "kube-scheduler"
-	// KubeProxy defines variable used internally when referring to kube-proxy component
+	// KubeProxy 定义引用kube-proxy组件时内部使用的变量
 	KubeProxy = "kube-proxy"
-	// CoreDNS defines variable used internally when referring to the CoreDNS component
+	// CoreDNS 定义引用CoreDNS组件时内部使用的变量
 	CoreDNS = "CoreDNS"
-	// Kubelet defines variable used internally when referring to the Kubelet
+	// Kubelet 定义引用库布雷时内部使用的变量
 	Kubelet = "kubelet"
 
 	// KubeCertificatesVolumeName specifies the name for the Volume that is used for injecting certificates to control plane components (can be both a hostPath volume or a projected, all-in-one volume)
@@ -344,24 +344,24 @@ const (
 	// DefaultAPIServerBindAddress is the default bind address for the API Server
 	DefaultAPIServerBindAddress = "0.0.0.0"
 
-	// ControlPlaneNumCPU is the number of CPUs required on control-plane
+	// ControlPlaneNumCPU 控制平面上需要多少个中央处理器
 	ControlPlaneNumCPU = 2
 
-	// ControlPlaneMem is the number of megabytes of memory required on the control-plane
-	// Below that amount of RAM running a stable control plane would be difficult.
+	// ControlPlaneMem 是控制平面上所需的内存兆字节数
+	// 低于这个内存量，运行一个稳定的控制平面将是困难的。
 	ControlPlaneMem = 1700
 
 	// KubeadmCertsSecret specifies in what Secret in the kube-system namespace the certificates should be stored
 	KubeadmCertsSecret = "kubeadm-certs"
 
-	// KubeletPort is the default port for the kubelet server on each host machine.
-	// May be overridden by a flag at startup.
+	// KubeletPort 是每台主机上kubelet服务器的默认端口。
+	// 可能在启动时被标志覆盖。
 	KubeletPort = 10250
-	// KubeSchedulerPort is the default port for the scheduler status server.
-	// May be overridden by a flag at startup.
+	// KubeSchedulerPort 是调度程序状态服务器的默认端口。
+	// 可能在启动时被标志覆盖。
 	KubeSchedulerPort = 10259
-	// KubeControllerManagerPort is the default port for the controller manager status server.
-	// May be overridden by a flag at startup.
+	// KubeControllerManagerPort 是控制器管理器状态服务器的默认端口。
+	// 可能在启动时被标志覆盖。
 	KubeControllerManagerPort = 10257
 
 	// EtcdAdvertiseClientUrlsAnnotationKey is the annotation key on every etcd pod, describing the
@@ -533,7 +533,7 @@ func GetStaticPodDirectory() string {
 	return filepath.Join(KubernetesDir, ManifestsSubDirName)
 }
 
-// GetStaticPodFilepath returns the location on the disk where the Static Pod should be present
+// GetStaticPodFilepath 返回磁盘上静态Pod应该存在的位置
 func GetStaticPodFilepath(componentName, manifestsDir string) string {
 	return filepath.Join(manifestsDir, componentName+".yaml")
 }

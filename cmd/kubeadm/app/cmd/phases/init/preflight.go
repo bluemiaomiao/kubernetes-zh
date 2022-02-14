@@ -36,12 +36,12 @@ var (
 		`)
 )
 
-// NewPreflightPhase creates a kubeadm workflow phase that implements preflight checks for a new control-plane node.
+// NewPreflightPhase 创建kubeadm工作流阶段，为新的控制平面节点实现预检检查。
 func NewPreflightPhase() workflow.Phase {
 	return workflow.Phase{
 		Name:    "preflight",
-		Short:   "Run pre-flight checks",
-		Long:    "Run pre-flight checks for kubeadm init.",
+		Short:   "运行 pre-flight checks",
+		Long:    "为 kubeadm init 运行 pre-flight checks",
 		Example: preflightExample,
 		Run:     runPreflight,
 		InheritFlags: []string{
@@ -51,27 +51,28 @@ func NewPreflightPhase() workflow.Phase {
 	}
 }
 
-// runPreflight executes preflight checks logic.
+// runPreflight 执行预检逻辑
 func runPreflight(c workflow.RunData) error {
 	data, ok := c.(InitData)
 	if !ok {
-		return errors.New("preflight phase invoked with an invalid data struct")
+		return errors.New("使用无效数据结构调用预检阶段")
 	}
 
-	fmt.Println("[preflight] Running pre-flight checks")
+	fmt.Println("[预检] 执行预检")
+	// 此处执行主机节点的检查
 	if err := preflight.RunInitNodeChecks(utilsexec.New(), data.Cfg(), data.IgnorePreflightErrors(), false, false); err != nil {
 		return err
 	}
 
 	if !data.DryRun() {
-		fmt.Println("[preflight] Pulling images required for setting up a Kubernetes cluster")
-		fmt.Println("[preflight] This might take a minute or two, depending on the speed of your internet connection")
-		fmt.Println("[preflight] You can also perform this action in beforehand using 'kubeadm config images pull'")
+		fmt.Println("[预检] 提取设置Kubernetes集群所需的镜像")
+		fmt.Println("[预检] 这可能需要一两分钟，具体取决于您的互联网连接速度")
+		fmt.Println("[预检] 您也可以使用 kubeadm config images pull")
 		if err := preflight.RunPullImagesCheck(utilsexec.New(), data.Cfg(), data.IgnorePreflightErrors()); err != nil {
 			return err
 		}
 	} else {
-		fmt.Println("[preflight] Would pull the required images (like 'kubeadm config images pull')")
+		fmt.Println("[预检] 需要提取所需的镜像 (例如 kubeadm config images pull")
 	}
 
 	return nil
