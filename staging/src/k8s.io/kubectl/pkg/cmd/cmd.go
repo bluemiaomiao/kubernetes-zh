@@ -83,12 +83,12 @@ import (
 
 const kubectlCmdHeaders = "KUBECTL_COMMAND_HEADERS"
 
-// NewDefaultKubectlCommand creates the `kubectl` command with default arguments
+// NewDefaultKubectlCommand 创建一个带有默认参数的kubectl命令
 func NewDefaultKubectlCommand() *cobra.Command {
 	return NewDefaultKubectlCommandWithArgs(NewDefaultPluginHandler(plugin.ValidPluginFilenamePrefixes), os.Args, os.Stdin, os.Stdout, os.Stderr)
 }
 
-// NewDefaultKubectlCommandWithArgs creates the `kubectl` command with arguments
+// NewDefaultKubectlCommandWithArgs 创建一个带有默认参数的kubectl命令
 func NewDefaultKubectlCommandWithArgs(pluginHandler PluginHandler, args []string, in io.Reader, out, errout io.Writer) *cobra.Command {
 	cmd := NewKubectlCommand(in, out, errout)
 
@@ -217,11 +217,11 @@ func HandlePluginCommand(pluginHandler PluginHandler, cmdArgs []string) error {
 	return nil
 }
 
-// NewKubectlCommand creates the `kubectl` command and its nested children.
+// NewKubectlCommand 创建kubectl命令及其嵌套子命令
 func NewKubectlCommand(in io.Reader, out, err io.Writer) *cobra.Command {
 	warningHandler := rest.NewWarningWriter(err, rest.WarningWriterOptions{Deduplicate: true, Color: term.AllowsColorOutput(err)})
 	warningsAsErrors := false
-	// Parent command to which all subcommands are added.
+	// 添加了所有子命令的父命令
 	cmds := &cobra.Command{
 		Use:   "kubectl",
 		Short: i18n.T("kubectl controls the Kubernetes cluster manager"),
