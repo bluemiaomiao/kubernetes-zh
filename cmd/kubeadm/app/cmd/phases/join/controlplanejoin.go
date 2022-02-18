@@ -53,16 +53,16 @@ func getControlPlaneJoinPhaseFlags(name string) []string {
 	return flags
 }
 
-// NewControlPlaneJoinPhase creates a kubeadm workflow phase that implements joining a machine as a control plane instance
+// NewControlPlaneJoinPhase 创建kubeadm工作流阶段，该阶段实现将机器作为控制平面实例加入
 func NewControlPlaneJoinPhase() workflow.Phase {
 	return workflow.Phase{
 		Name:    "control-plane-join",
-		Short:   "Join a machine as a control plane instance",
+		Short:   "将机器作为控制平面实例加入",
 		Example: controlPlaneJoinExample,
 		Phases: []workflow.Phase{
 			{
 				Name:           "all",
-				Short:          "Join a machine as a control plane instance",
+				Short:          "将机器作为控制平面实例加入",
 				InheritFlags:   getControlPlaneJoinPhaseFlags("all"),
 				RunAllSiblings: true,
 				ArgsValidator:  cobra.NoArgs,
@@ -88,7 +88,7 @@ func newUpdateStatusSubphase() workflow.Phase {
 	return workflow.Phase{
 		Name: "update-status",
 		Short: fmt.Sprintf(
-			"Register the new control-plane node into the ClusterStatus maintained in the %s ConfigMap (DEPRECATED)",
+			"将新的控制平面节点注册到 %s ConfigMap 中维护的ClusterStatus中(已弃用)",
 			kubeadmconstants.KubeadmConfigConfigMap,
 		),
 		Run:           runUpdateStatusPhase,

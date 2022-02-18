@@ -134,26 +134,31 @@ func (w *KubeWaiter) WaitForPodToDisappear(podName string) error {
 	})
 }
 
-// WaitForHealthyKubelet blocks until the kubelet /healthz endpoint returns 'ok'
+// WaitForHealthyKubelet 一直阻塞, 直到kubelet 的/healthz 端点返回ok
 func (w *KubeWaiter) WaitForHealthyKubelet(initialTimeout time.Duration, healthzEndpoint string) error {
 	time.Sleep(initialTimeout)
-	fmt.Printf("[kubelet-check] Initial timeout of %v passed.\n", initialTimeout)
+	fmt.Printf("[检查kubelet] %v的初始超时已过\n", initialTimeout)
 	return TryRunCommand(func() error {
 		client := &http.Client{Transport: netutil.SetOldTransportDefaults(&http.Transport{})}
+
 		resp, err := client.Get(healthzEndpoint)
 		if err != nil {
-			fmt.Println("[kubelet-check] It seems like the kubelet isn't running or healthy.")
-			fmt.Printf("[kubelet-check] The HTTP call equal to 'curl -sSL %s' failed with error: %v.\n", healthzEndpoint, err)
+			fmt.Println("[检查kubelet] 看起来kubelet不运行或不健康。")
+			fmt.Printf("[检查kubelet] 这个HTTP调用等同于 'curl -sSL %s' , 但是存在错误: %v.\n", healthzEndpoint, err)
 			return err
 		}
-		defer resp.Body.Close()
+
+		defer func(Body io.ReadCloser) {
+			_ = Body.Close()
+		}(resp.Body)
+
 		if resp.StatusCode != http.StatusOK {
-			fmt.Println("[kubelet-check] It seems like the kubelet isn't running or healthy.")
-			fmt.Printf("[kubelet-check] The HTTP call equal to 'curl -sSL %s' returned HTTP code %d\n", healthzEndpoint, resp.StatusCode)
-			return errors.New("the kubelet healthz endpoint is unhealthy")
+			fmt.Println("[检查kubelet] kubelet似乎没有运行或健康。")
+			fmt.Printf("[检查kubelet] 这个HTTP调用等同于 'curl -sSL %s' 返回的HTTP状态码 %d\n", healthzEndpoint, resp.StatusCode)
+			return errors.New("kubelet健康端点不健康")
 		}
 		return nil
-	}, 5) // a failureThreshold of five means waiting for a total of 155 seconds
+	}, 5) // 失败等待五秒意味着总共等待155秒
 }
 
 // WaitForKubeletAndFunc 主要等待函数f执行，尽管这可能需要一些时间。
@@ -253,20 +258,21 @@ func getStaticPodSingleHash(client clientset.Interface, nodeName string, compone
 	return staticPodHash, nil
 }
 
-// TryRunCommand runs a function a maximum of failureThreshold times, and retries on error. If failureThreshold is hit; the last error is returned
+// TryRunCommand 最多运行一个函数失败一次，并在出错时重试。如果失败，则点击保存；返回最后一个错误
 func TryRunCommand(f func() error, failureThreshold int) error {
 	backoff := wait.Backoff{
 		Duration: 5 * time.Second,
-		Factor:   2, // double the timeout for every failure
+		Factor:   2, // 每次失败超时时间加倍
 		Steps:    failureThreshold,
 	}
+	// 这个函数持续检查某一个条件，如果超时或者等待函数返回
 	return wait.ExponentialBackoff(backoff, func() (bool, error) {
 		err := f()
 		if err != nil {
 			// Retry until the timeout
 			return false, nil
 		}
-		// The last f() call was a success, return cleanly
+		// 最后一次f()调用成功，干净利落地返回
 		return true, nil
 	})
 }

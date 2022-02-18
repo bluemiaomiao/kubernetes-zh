@@ -166,7 +166,7 @@ func newControlPlanePrepareKubeconfigSubphase() workflow.Phase {
 func newControlPlanePrepareControlPlaneSubphase() workflow.Phase {
 	return workflow.Phase{
 		Name:          "control-plane",
-		Short:         "Generate the manifests for the new control plane components",
+		Short:         "为新的控制平面组件生成清单",
 		Run:           runControlPlanePrepareControlPlaneSubphase, //NB. eventually in future we would like to break down this in sub phases for each component
 		InheritFlags:  getControlPlanePreparePhaseFlags("control-plane"),
 		ArgsValidator: cobra.NoArgs,
