@@ -35,11 +35,13 @@ import (
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
+	// 主要的返回Cobra.Command结构体的函数
+	// cmd对象来自vender目录, kubectl是独立的项目
 	command := cmd.NewDefaultKubectlCommand()
 
-	// TODO: once we switch everything over to Cobra commands, we can go back to calling
-	// cliflag.InitFlags() (by removing its pflag.Parse() call). For now, we have to set the
-	// normalize func and add the go flag set by hand.
+	// TODO: 一旦我们将一切切换到Cobra命令，我们就可以继续调用
+	// cliflag.InitFlags() (通过移除 pflag.Parse() 调用)
+	// 现在，我们必须设置normalize函数，并添加手工设置的go标志。
 	pflag.CommandLine.SetNormalizeFunc(cliflag.WordSepNormalizeFunc)
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 	// cliflag.InitFlags()
