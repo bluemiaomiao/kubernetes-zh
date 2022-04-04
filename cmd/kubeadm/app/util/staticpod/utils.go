@@ -226,18 +226,21 @@ func WriteStaticPodToDisk(componentName, manifestDir string, pod v1.Pod) error {
 	return nil
 }
 
-// ReadStaticPodFromDisk reads a static pod file from disk
+// ReadStaticPodFromDisk 从磁盘读取静态 Pod 文件
 func ReadStaticPodFromDisk(manifestPath string) (*v1.Pod, error) {
 	buf, err := ioutil.ReadFile(manifestPath)
 	if err != nil {
-		return &v1.Pod{}, errors.Wrapf(err, "failed to read manifest for %q", manifestPath)
+		return &v1.Pod{}, errors.Wrapf(err, "无法读取 %q 的清单", manifestPath)
 	}
 
+	// 反序列化 YAML 文件的内容
 	obj, err := kubeadmutil.UnmarshalFromYaml(buf, v1.SchemeGroupVersion)
 	if err != nil {
-		return &v1.Pod{}, errors.Errorf("failed to unmarshal manifest for %q from YAML: %v", manifestPath, err)
+		return &v1.Pod{}, errors.Errorf("无法从 YAML 反序列化 %q 的清单: %v", manifestPath, err)
 	}
 
+	// 强制类型转换
+	// Pod 是 Kubernetes 中的核心概念，Pod 是可以在主机上运行的容器的集合。该资源由客户端创建，并部署在主机上。
 	pod := obj.(*v1.Pod)
 
 	return pod, nil

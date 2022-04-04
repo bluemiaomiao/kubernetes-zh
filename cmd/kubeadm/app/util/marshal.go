@@ -54,7 +54,7 @@ func MarshalToYamlForCodecs(obj runtime.Object, gv schema.GroupVersion, codecs s
 	return runtime.Encode(encoder, obj)
 }
 
-// UnmarshalFromYaml unmarshals yaml into an object.
+// UnmarshalFromYaml 反序列化 YAML 到一个对象中
 func UnmarshalFromYaml(buffer []byte, gv schema.GroupVersion) (runtime.Object, error) {
 	return UnmarshalFromYamlForCodecs(buffer, gv, clientsetscheme.Codecs)
 }

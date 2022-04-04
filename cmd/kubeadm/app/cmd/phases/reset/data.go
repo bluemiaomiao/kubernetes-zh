@@ -25,8 +25,8 @@ import (
 	clientset "k8s.io/client-go/kubernetes"
 )
 
-// resetData is the interface to use for reset phases.
-// The "resetData" type from "cmd/reset.go" must satisfy this interface.
+// resetData 是用于重置阶段的接口
+// cmd/reset.go 中的 resetData 类型必须满足此接口
 type resetData interface {
 	ForceReset() bool
 	InputReader() io.Reader

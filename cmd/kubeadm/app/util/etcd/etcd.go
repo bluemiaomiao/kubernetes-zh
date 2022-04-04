@@ -88,20 +88,21 @@ func New(endpoints []string, ca, cert, key string) (*Client, error) {
 	return &client, nil
 }
 
-// NewFromCluster creates an etcd client for the etcd endpoints present in etcd member list. In order to compose this information,
-// it will first discover at least one etcd endpoint to connect to. Once created, the client synchronizes client's endpoints with
-// the known endpoints from the etcd membership API, since it is the authoritative source of truth for the list of available members.
+// NewFromCluster 为 etcd 成员列表中的 etcd Endpoint 创建 etcd 客户端。
+// 为了编写这些信息，它将首先发现至少一个要连接的 etcd Endpoint。
+// 创建后，客户端将客户端的 Endpoint 与来自 etcd 成员资格 API 的已知 Endpoint 同步，因为它是可用成员列表的权威来源。
 func NewFromCluster(client clientset.Interface, certificatesDir string) (*Client, error) {
-	// Discover at least one etcd endpoint to connect to by inspecting the existing etcd pods
+	// 通过检查现有的 etcd Pod，发现至少一个要连接的 etcd Endpoint
 
-	// Get the list of etcd endpoints
+	// 获取 etcd Endpoint 列表
 	endpoints, err := getEtcdEndpoints(client)
 	if err != nil {
 		return nil, err
 	}
-	klog.V(1).Infof("etcd endpoints read from pods: %s", strings.Join(endpoints, ","))
 
-	// Creates an etcd client
+	klog.V(1).Infof("从 Pod 读取的 etcd Endpoint: %s", strings.Join(endpoints, ","))
+
+	// 创建一个 etcd 客户端
 	etcdClient, err := New(
 		endpoints,
 		filepath.Join(certificatesDir, constants.EtcdCACertName),
@@ -109,10 +110,10 @@ func NewFromCluster(client clientset.Interface, certificatesDir string) (*Client
 		filepath.Join(certificatesDir, constants.EtcdHealthcheckClientKeyName),
 	)
 	if err != nil {
-		return nil, errors.Wrapf(err, "error creating etcd client for %v endpoints", endpoints)
+		return nil, errors.Wrapf(err, "为 %v 个 Endpoint 创建 etcd 客户端时出错", endpoints)
 	}
 
-	// synchronizes client's endpoints with the known endpoints from the etcd membership.
+	// 将客户端的 Endpoint 与 etcd 成员中的已知 Endpoint 同步。
 	err = etcdClient.Sync()
 	if err != nil {
 		return nil, errors.Wrap(err, "error syncing endpoints with etcd")
@@ -122,21 +123,22 @@ func NewFromCluster(client clientset.Interface, certificatesDir string) (*Client
 	return etcdClient, nil
 }
 
-// getEtcdEndpoints returns the list of etcd endpoints.
+// getEtcdEndpoints 返回 etcd 全部的 Endpoint
 func getEtcdEndpoints(client clientset.Interface) ([]string, error) {
 	return getEtcdEndpointsWithBackoff(client, constants.StaticPodMirroringDefaultRetry)
 }
 
+// getEtcdEndpointsWithBackoff 通过补偿的方式返回 etcd 全部的 Endpoint
 func getEtcdEndpointsWithBackoff(client clientset.Interface, backoff wait.Backoff) ([]string, error) {
 	return getRawEtcdEndpointsFromPodAnnotation(client, backoff)
 }
 
-// getRawEtcdEndpointsFromPodAnnotation returns the list of endpoints as reported on etcd's pod annotations using the given backoff
+// getRawEtcdEndpointsFromPodAnnotation 使用给定补偿返回 etcd Pod 注解上报告的 Endpoint 列表
 func getRawEtcdEndpointsFromPodAnnotation(client clientset.Interface, backoff wait.Backoff) ([]string, error) {
+	// etcd 的 Endpoint 列表
 	etcdEndpoints := []string{}
 	var lastErr error
-	// Let's tolerate some unexpected transient failures from the API server or load balancers. Also, if
-	// static pods were not yet mirrored into the API server we want to wait for this propagation.
+	// 让我们容忍一些来自 API Server 或负载平衡器的意外瞬时故障。此外，如果静态 Pod 还没有被镜像到 API Server 中，我们希望等待这个传播过程。
 	err := wait.ExponentialBackoff(backoff, func() (bool, error) {
 		var overallEtcdPodCount int
 		if etcdEndpoints, overallEtcdPodCount, lastErr = getRawEtcdEndpointsFromPodAnnotationWithoutRetry(client); lastErr != nil {
@@ -159,25 +161,27 @@ func getRawEtcdEndpointsFromPodAnnotation(client clientset.Interface, backoff wa
 	return etcdEndpoints, nil
 }
 
-// getRawEtcdEndpointsFromPodAnnotationWithoutRetry returns the list of etcd endpoints as reported by etcd Pod annotations,
-// along with the number of global etcd pods. This allows for callers to tell the difference between "no endpoints found",
-// and "no endpoints found and pods were listed", so they can skip retrying.
+// getRawEtcdEndpointsFromPodAnnotationWithoutRetry 返回由 etcd Endpoint 注解报告的的 etcd Endpoint 列表，以及全局 etcd Endpoint 的数量。
+// 这允许呼叫者区分“未找到 Endpoint ”和“未找到 Endpoint 且列出了 Pod”之间的区别，因此他们可以跳过重试。
 func getRawEtcdEndpointsFromPodAnnotationWithoutRetry(client clientset.Interface) ([]string, int, error) {
-	klog.V(3).Infof("retrieving etcd endpoints from %q annotation in etcd Pods", constants.EtcdAdvertiseClientUrlsAnnotationKey)
+	klog.V(3).Infof("从 etcd Endpoint 中的 %q 注解中检索 etcd Endpoint", constants.EtcdAdvertiseClientUrlsAnnotationKey)
+
+	// 从 kube-system 这个名称空间获取
 	podList, err := client.CoreV1().Pods(metav1.NamespaceSystem).List(
 		context.TODO(),
 		metav1.ListOptions{
-			LabelSelector: fmt.Sprintf("component=%s,tier=%s", constants.Etcd, constants.ControlPlaneTier),
+			LabelSelector: fmt.Sprintf("组件=%s, 等级=%s", constants.Etcd, constants.ControlPlaneTier),
 		},
 	)
 	if err != nil {
 		return []string{}, 0, err
 	}
+
 	etcdEndpoints := []string{}
 	for _, pod := range podList.Items {
 		etcdEndpoint, ok := pod.ObjectMeta.Annotations[constants.EtcdAdvertiseClientUrlsAnnotationKey]
 		if !ok {
-			klog.V(3).Infof("etcd Pod %q is missing the %q annotation; cannot infer etcd advertise client URL using the Pod annotation", pod.ObjectMeta.Name, constants.EtcdAdvertiseClientUrlsAnnotationKey)
+			klog.V(3).Infof("etcd Pod %q 缺少 %q 注解；无法使用 Pod 注解推断 etcd 广播客户端的 URL", pod.ObjectMeta.Name, constants.EtcdAdvertiseClientUrlsAnnotationKey)
 			continue
 		}
 		etcdEndpoints = append(etcdEndpoints, etcdEndpoint)
@@ -185,9 +189,9 @@ func getRawEtcdEndpointsFromPodAnnotationWithoutRetry(client clientset.Interface
 	return etcdEndpoints, len(podList.Items), nil
 }
 
-// Sync synchronizes client's endpoints with the known endpoints from the etcd membership.
+// Sync 将客户端的 Endpoint 与 etcd 成员中的已知 Endpoint 同步。
 func (c *Client) Sync() error {
-	// Syncs the list of endpoints
+	// 同步 Endpoint 列表
 	var cli *clientv3.Client
 	var lastError error
 	err := wait.ExponentialBackoff(etcdBackoff, func() (bool, error) {
@@ -196,7 +200,7 @@ func (c *Client) Sync() error {
 			Endpoints:   c.Endpoints,
 			DialTimeout: etcdTimeout,
 			DialOptions: []grpc.DialOption{
-				grpc.WithBlock(), // block until the underlying connection is up
+				grpc.WithBlock(), // 阻塞，直到基础连接启动
 			},
 			TLS: c.TLS,
 		})
@@ -204,23 +208,34 @@ func (c *Client) Sync() error {
 			lastError = err
 			return false, nil
 		}
-		defer cli.Close()
+
+		// 处理客户端错误, 原来的代码没有处理
+		defer func(cli *clientv3.Client) {
+			_ = cli.Close()
+		}(cli)
 
 		ctx, cancel := context.WithTimeout(context.Background(), etcdTimeout)
+
+		// 这才是真正的同步方法
 		err = cli.Sync(ctx)
+
 		cancel()
 		if err == nil {
 			return true, nil
 		}
-		klog.V(5).Infof("Failed to sync etcd endpoints: %v", err)
+
+		klog.V(5).Infof("同步 etcd Endpoint 失败: %v", err)
+
 		lastError = err
 		return false, nil
 	})
+
 	if err != nil {
 		return lastError
 	}
-	klog.V(1).Infof("etcd endpoints read from etcd: %s", strings.Join(cli.Endpoints(), ","))
+	klog.V(1).Infof("从 etcd 读取的 etcd Endpoint: %s", strings.Join(cli.Endpoints(), ","))
 
+	// 为客户端列出已经注册的全部 Endpoint
 	c.Endpoints = cli.Endpoints()
 	return nil
 }

@@ -86,11 +86,11 @@ func CheckLocalEtcdClusterStatus(client clientset.Interface, cfg *kubeadmapi.Clu
 	return nil
 }
 
-// RemoveStackedEtcdMemberFromCluster will remove a local etcd member from etcd cluster,
-// when reset the control plane node.
+// RemoveStackedEtcdMemberFromCluster 当重置当前的控制面板节点时，将会在 etcd 集群中移除本地 etcd 成员,
 func RemoveStackedEtcdMemberFromCluster(client clientset.Interface, cfg *kubeadmapi.InitConfiguration) error {
-	// creates an etcd client that connects to all the local/stacked etcd members
-	klog.V(1).Info("[etcd] creating etcd client that connects to etcd pods")
+	// 创建一个连接到所有本地/堆叠 etcd 成员的 etcd 客户端
+	klog.V(1).Info("[etcd] 创建一个 etcd 客户端连接到 etcd 的 Pod")
+
 	etcdClient, err := etcdutil.NewFromCluster(client, cfg.CertificatesDir)
 	if err != nil {
 		return err

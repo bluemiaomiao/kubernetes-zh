@@ -75,9 +75,9 @@ const (
 
 	// EtcdCACertAndKeyBaseName defines etcd's CA certificate and key base name
 	EtcdCACertAndKeyBaseName = "etcd/ca"
-	// EtcdCACertName defines etcd's CA certificate name
+	// EtcdCACertName 定义 etcd 的 CA 证书名称
 	EtcdCACertName = "etcd/ca.crt"
-	// EtcdCAKeyName defines etcd's CA key name
+	// EtcdCAKeyName 定义 etcd 的 CA 密钥名
 	EtcdCAKeyName = "etcd/ca.key"
 
 	// EtcdServerCertAndKeyBaseName defines etcd's server certificate and key base name
@@ -104,9 +104,9 @@ const (
 
 	// EtcdHealthcheckClientCertAndKeyBaseName defines etcd's healthcheck client certificate and key base name
 	EtcdHealthcheckClientCertAndKeyBaseName = "etcd/healthcheck-client"
-	// EtcdHealthcheckClientCertName defines etcd's healthcheck client certificate name
+	// EtcdHealthcheckClientCertName 定义 etcd 的健康检查客户端证书名称
 	EtcdHealthcheckClientCertName = "etcd/healthcheck-client.crt"
-	// EtcdHealthcheckClientKeyName defines etcd's healthcheck client key name
+	// EtcdHealthcheckClientKeyName 定义 etcd 的健康检查客户端密钥名称
 	EtcdHealthcheckClientKeyName = "etcd/healthcheck-client.key"
 	// EtcdHealthcheckClientCertCommonName defines etcd's healthcheck client certificate common name (CN)
 	EtcdHealthcheckClientCertCommonName = "kube-etcd-healthcheck-client"
@@ -363,8 +363,7 @@ const (
 	// 可能在启动时被标志覆盖。
 	KubeControllerManagerPort = 10257
 
-	// EtcdAdvertiseClientUrlsAnnotationKey is the annotation key on every etcd pod, describing the
-	// advertise client URLs
+	// EtcdAdvertiseClientUrlsAnnotationKey 是每个 etcd Pod 上的注解的 Key，描述广播客户端 URL
 	EtcdAdvertiseClientUrlsAnnotationKey = "kubeadm.kubernetes.io/etcd.advertise-client-urls"
 	// KubeAPIServerAdvertiseAddressEndpointAnnotationKey is the annotation key on every apiserver pod,
 	// describing the API endpoint (advertise address and bind port of the api server)
@@ -373,7 +372,7 @@ const (
 	// a SHA256 sum to check for user changes
 	ComponentConfigHashAnnotationKey = "kubeadm.kubernetes.io/component-config.hash"
 
-	// ControlPlaneTier is the value used in the tier label to identify control plane components
+	// ControlPlaneTier 是层标签中用于标识控制平面组件的值
 	ControlPlaneTier = "control-plane"
 
 	// Mode* constants were copied from pkg/kubeapiserver/authorizer/modes
@@ -475,8 +474,7 @@ var (
 	// the bootstrap tokens to access the kubeadm-certs Secret during the join of a new control-plane
 	KubeadmCertsClusterRoleName = fmt.Sprintf("kubeadm:%s", KubeadmCertsSecret)
 
-	// StaticPodMirroringDefaultRetry is used a backoff strategy for
-	// waiting for static pods to be mirrored to the apiserver.
+	// StaticPodMirroringDefaultRetry 用于等待静态 Pod 被镜像到 API Server的补偿策略。
 	StaticPodMirroringDefaultRetry = wait.Backoff{
 		Steps:    30,
 		Duration: 1 * time.Second,

@@ -17,12 +17,12 @@ limitations under the License.
 package main
 
 import (
-	"fmt"
 	"k8s.io/kubernetes/cmd/kubeadm/app"
 	kubeadmutil "k8s.io/kubernetes/cmd/kubeadm/app/util"
 )
 
+// kubeadm 二进制文件的主函数
 func main() {
-	fmt.Println("执行: cmd/kubeadm/kubeadm.go[main][CheckErr]")
+	// CheckErr 用于将 app.Run() 返回的 error 类型的值转换为字符串并打印出来
 	kubeadmutil.CheckErr(app.Run())
 }

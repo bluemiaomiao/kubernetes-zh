@@ -32,8 +32,8 @@ func NewPreflightPhase() workflow.Phase {
 	return workflow.Phase{
 		Name:    "preflight",
 		Aliases: []string{"pre-flight"},
-		Short:   "Run reset pre-flight checks",
-		Long:    "Run pre-flight checks for kubeadm reset.",
+		Short:   "运行重置操作的预检",
+		Long:    "为 kubeadm reset 运行预检",
 		Run:     runPreflight,
 		InheritFlags: []string{
 			options.IgnorePreflightErrors,
@@ -42,26 +42,28 @@ func NewPreflightPhase() workflow.Phase {
 	}
 }
 
-// runPreflight executes preflight checks logic.
+// runPreflight 执行预检逻辑
 func runPreflight(c workflow.RunData) error {
 	r, ok := c.(resetData)
 	if !ok {
-		return errors.New("preflight phase invoked with an invalid data struct")
+		return errors.New("用无效的数据结构调用了预检阶段")
 	}
 
 	if !r.ForceReset() {
-		fmt.Println("[reset] WARNING: Changes made to this host by 'kubeadm init' or 'kubeadm join' will be reverted.")
-		fmt.Print("[reset] Are you sure you want to proceed? [y/N]: ")
+		fmt.Println("[重置] 警告: kubeadm init 或 kubeadm join 对此主机所做的更改将被还原")
+		fmt.Print("[重置] 确定要开始吗? [y/N]: ")
+
 		s := bufio.NewScanner(r.InputReader())
 		s.Scan()
+		
 		if err := s.Err(); err != nil {
 			return err
 		}
 		if strings.ToLower(s.Text()) != "y" {
-			return errors.New("aborted reset operation")
+			return errors.New("中止重置操作")
 		}
 	}
 
-	fmt.Println("[preflight] Running pre-flight checks")
+	fmt.Println("[预检] 运行预检")
 	return preflight.RunRootCheckOnly(r.IgnorePreflightErrors())
 }

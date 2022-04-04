@@ -2,7 +2,6 @@ package app
 
 import (
 	"flag"
-	"fmt"
 	"os"
 
 	"k8s.io/kubernetes/cmd/kubeadm/app/cmd"
@@ -15,7 +14,9 @@ import (
 
 // Run 创建和执行新的kubeadm命令
 func Run() error {
+	// 用于实现 Google 内部 C++ 日志库一致的日志处理方式
 	klog.InitFlags(nil)
+
 	pflag.CommandLine.SetNormalizeFunc(cliflag.WordSepNormalizeFunc)
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 
@@ -31,6 +32,6 @@ func Run() error {
 	_ = pflag.CommandLine.MarkHidden("stderrthreshold")
 	_ = pflag.CommandLine.MarkHidden("vmodule")
 
-	fmt.Println("执行: cmd/kubeadm/app/kubeadm.go[Run][NewKubeadmCommand]")
+	// 创建 kubeadm 的 cobra.Command 结构体，并执行
 	return cmd.NewKubeadmCommand(os.Stdin, os.Stdout, os.Stderr).Execute()
 }

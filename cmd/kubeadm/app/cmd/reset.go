@@ -42,18 +42,17 @@ import (
 
 var (
 	iptablesCleanupInstructions = dedent.Dedent(`
-		The reset process does not reset or clean up iptables rules or IPVS tables.
-		If you wish to reset iptables, you must do so manually by using the "iptables" command.
+		重置过程不会重置或清除 iptables 规则或 IPVS 表。
+		如果您想要重设 iptables，您必须使用 iptables 命令手动重设。
 
-		If your cluster was setup to utilize IPVS, run ipvsadm --clear (or similar)
-		to reset your system's IPVS tables.
+		如果你的集群是使用 IPVA 设置的，那么运行 ipvsadm --clear 重置你的系统 IPVS 表。
 
-		The reset process does not clean your kubeconfig files and you must remove them manually.
-		Please, check the contents of the $HOME/.kube/config file.
+		重置过程不会清除 kubeconfig 文件，您必须手动删除它们。
+		请检查 $HOME/.kube/config 文件的内容。
 	`)
 
 	cniCleanupInstructions = dedent.Dedent(`
-		The reset process does not clean CNI configuration. To do so, you must remove /etc/cni/net.d
+		重置进程不会清除 CNI 配置。 为此，您必须删除/etc/cni/net.d
 	`)
 )
 
@@ -195,20 +194,18 @@ func newCmdReset(in io.Reader, out io.Writer, resetOptions *resetOptions) *cobra
 
 	AddResetFlags(cmd.Flags(), resetOptions)
 
-	// initialize the workflow runner with the list of phases
+	// 将 Phase 添加到 Runner 中
 	resetRunner.AppendPhase(phases.NewPreflightPhase())
 	resetRunner.AppendPhase(phases.NewUpdateClusterStatus())
 	resetRunner.AppendPhase(phases.NewRemoveETCDMemberPhase())
 	resetRunner.AppendPhase(phases.NewCleanupNodePhase())
 
-	// sets the data builder function, that will be used by the runner
-	// both when running the entire workflow or single phases
+	// 设置数据构建器功能，运行整个 Workflow 或单个 Phase 时，Runner 都将使用该功能
 	resetRunner.SetDataInitializer(func(cmd *cobra.Command, args []string) (workflow.RunData, error) {
 		return newResetData(cmd, resetOptions, in, out)
 	})
 
-	// binds the Runner to kubeadm init command by altering
-	// command help, adding --skip-phases flag and by adding phases subcommands
+	// 通过修改命令帮助,添加 --skip-phases 标志和添加 Phase 子命令，将 Runner 绑定到 kubeadm init 命令
 	resetRunner.BindToCommand(cmd)
 
 	return cmd

@@ -112,8 +112,8 @@ type initData struct {
 	patchesDir              string
 }
 
-// newCmdInit 返回kubeadm init命令
-// 注意. initOptions作为参数公开，以允许对newInitOptions方法进行单元测试，该方法实现了所有命令选项验证逻辑
+// newCmdInit 返回 kubeadm init 命令
+// 注意. initOptions 作为参数公开，以允许对 newInitOptions 方法进行单元测试，该方法实现了所有命令选项验证逻辑
 func newCmdInit(out io.Writer, initOptions *initOptions) *cobra.Command {
 	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit]...")
 	// 如果没有指定初始化的选项, 那么创建一个新的初始化选项
@@ -131,7 +131,6 @@ func newCmdInit(out io.Writer, initOptions *initOptions) *cobra.Command {
 		// Run函数与RunE函数都是运行命令的功能函数, 但是当功能执行错误之后, Run需要手动调用cmd.Help(), RunE函数会自动调用
 		// 并且如果Run与RunE同时在cobra.Command结构体对象中实现, 那么RunE函数的调用优先级高于Run函数
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][RunE]")
 
 			// 通过传入的命令行选项初始化initRunner的initData结构体
 			c, err := initRunner.InitData(args)
@@ -156,12 +155,6 @@ func newCmdInit(out io.Writer, initOptions *initOptions) *cobra.Command {
 	// TODO: 猜测是将一些标志保存起来, 然后如果其他阶段产生了子任务, 可能会使用到这些标志
 	// 添加标志到init命令中
 	// init命令本地的标志最终可能会被自动为其他阶段生成的子命令使用
-	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][AddInitConfigFlags]")
-	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][AddClusterConfigFlags]")
-	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][AddInitOtherFlags]")
-	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][AddTokenFlag]")
-	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][AddTTLFlag]")
-	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][AddImageMetaFlags]")
 
 	AddInitConfigFlags(cmd.Flags(), initOptions.externalInitCfg)
 	AddClusterConfigFlags(cmd.Flags(), initOptions.externalClusterCfg, &initOptions.featureGatesString)
@@ -171,19 +164,13 @@ func newCmdInit(out io.Writer, initOptions *initOptions) *cobra.Command {
 	options.AddImageMetaFlags(cmd.Flags(), &initOptions.externalClusterCfg.ImageRepository)
 
 	// 定义init命令未使用但最终可由其他阶段自动生成的子命令使用的附加标志
-	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][SetAdditionalFlags]")
 	initRunner.SetAdditionalFlags(func(flags *flag.FlagSet) {
-		fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][AddKubeConfigFlag]")
-		fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][AddKubeConfigDirFlag]")
-		fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][AddControlPlanExtraArgsFlags]")
-
 		options.AddKubeConfigFlag(flags, &initOptions.kubeconfigPath)
 		options.AddKubeConfigDirFlag(flags, &initOptions.kubeconfigDir)
 		options.AddControlPlanExtraArgsFlags(flags, &initOptions.externalClusterCfg.APIServer.ExtraArgs, &initOptions.externalClusterCfg.ControllerManager.ExtraArgs, &initOptions.externalClusterCfg.Scheduler.ExtraArgs)
 	})
 
 	// 使用不同阶段(Phase)的任务初始化Workflow的Runner
-	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][AppendPhase] x 13")
 	initRunner.AppendPhase(phases.NewPreflightPhase())
 	initRunner.AppendPhase(phases.NewCertsPhase())
 	initRunner.AppendPhase(phases.NewKubeConfigPhase())
@@ -199,7 +186,6 @@ func newCmdInit(out io.Writer, initOptions *initOptions) *cobra.Command {
 	initRunner.AppendPhase(phases.NewAddonPhase())
 
 	// 设置数据生成器函数, 在Runner整个Workflow或者单个阶段上都使用该函数
-	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][SetDataInitializer]")
 	initRunner.SetDataInitializer(func(cmd *cobra.Command, args []string) (workflow.RunData, error) {
 		data, err := newInitData(cmd, args, initOptions, out)
 		if err != nil {
@@ -213,10 +199,8 @@ func newCmdInit(out io.Writer, initOptions *initOptions) *cobra.Command {
 	})
 
 	// 通过更改命令帮助、添加--skip phases标志和添加phases子命令，将运行程序绑定到kubeadm init命令
-	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit][BindToCommand]")
 	initRunner.BindToCommand(cmd)
 
-	fmt.Println("执行: cmd/kubeadm/app/cmd/init.go[newCmdInit]...Done")
 	return cmd
 }
 

@@ -25,11 +25,11 @@ import (
 	kubeadmconstants "k8s.io/kubernetes/cmd/kubeadm/app/constants"
 )
 
-// NewUpdateClusterStatus creates a kubeadm workflow phase for update-cluster-status
+// NewUpdateClusterStatus 创建一个 kubeadm Workflow 的 Phase 执行 update-cluster-status
 func NewUpdateClusterStatus() workflow.Phase {
 	return workflow.Phase{
 		Name:  "update-cluster-status",
-		Short: "Remove this node from the ClusterStatus object (DEPRECATED).",
+		Short: "在 ClusterStatus 对象中删除这个节点 (废弃)",
 		Run:   runUpdateClusterStatus,
 	}
 }
@@ -37,13 +37,13 @@ func NewUpdateClusterStatus() workflow.Phase {
 func runUpdateClusterStatus(c workflow.RunData) error {
 	r, ok := c.(resetData)
 	if !ok {
-		return errors.New("update-cluster-status phase invoked with an invalid data struct")
+		return errors.New("无效的数据结构调用了 update-cluster-status 阶段")
 	}
 
 	cfg := r.Cfg()
 	if isControlPlane() && cfg != nil {
-		fmt.Println("The 'update-cluster-status' phase is deprecated and will be removed in a future release. " +
-			"Currently it performs no operation")
+		fmt.Println("update-cluster-status 阶段是废弃的功能，在未来的代码中可能会被移除" +
+			"目前它不执行任何操作")
 	}
 	return nil
 }

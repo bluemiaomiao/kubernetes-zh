@@ -31,12 +31,12 @@ import (
 	"k8s.io/klog/v2"
 )
 
-// NewRemoveETCDMemberPhase creates a kubeadm workflow phase for remove-etcd-member
+// NewRemoveETCDMemberPhase 为 remove-etcd-member 创建一个 kubeadm Workflow 的 Phase
 func NewRemoveETCDMemberPhase() workflow.Phase {
 	return workflow.Phase{
 		Name:  "remove-etcd-member",
-		Short: "Remove a local etcd member.",
-		Long:  "Remove a local etcd member for a control plane node.",
+		Short: "移除本地 etcd 成员",
+		Long:  "移除控制平面节点的本地 etcd 成员",
 		Run:   runRemoveETCDMemberPhase,
 		InheritFlags: []string{
 			options.KubeconfigPath,
@@ -47,29 +47,32 @@ func NewRemoveETCDMemberPhase() workflow.Phase {
 func runRemoveETCDMemberPhase(c workflow.RunData) error {
 	r, ok := c.(resetData)
 	if !ok {
-		return errors.New("remove-etcd-member-phase phase invoked with an invalid data struct")
+		return errors.New("无效的数据结构调用了 remove-etcd-member-phase 阶段")
 	}
 	cfg := r.Cfg()
 
-	// Only clear etcd data when using local etcd.
-	klog.V(1).Infoln("[reset] Checking for etcd config")
+	// 仅在使用本地 etcd 时清除 etcd 数据
+	klog.V(1).Infoln("[重置] 检查 etcd 配置")
+	// 获取的 etcd 的配置文件
 	etcdManifestPath := filepath.Join(kubeadmconstants.KubernetesDir, kubeadmconstants.ManifestsSubDirName, "etcd.yaml")
+	// 获取到 etcd 的数据目录
 	etcdDataDir, err := getEtcdDataDir(etcdManifestPath, cfg)
 	if err == nil {
 		r.AddDirsToClean(etcdDataDir)
 		if cfg != nil {
 			if err := etcdphase.RemoveStackedEtcdMemberFromCluster(r.Client(), cfg); err != nil {
-				klog.Warningf("[reset] failed to remove etcd member: %v, please manually remove this etcd member using etcdctl", err)
+				klog.Warningf("[重置] 无法删除 etcd 成员: %v，请使用 etcdctl 手动删除此 etcd 成员", err)
 			}
 		}
 	} else {
-		fmt.Println("[reset] No etcd config found. Assuming external etcd")
-		fmt.Println("[reset] Please, manually reset etcd to prevent further issues")
+		fmt.Println("[重置] 没有发现 etcd 的配置。可能是外部的 etcd。")
+		fmt.Println("[重置] 请手动重置 etcd 以防止进一步的问题")
 	}
 
 	return nil
 }
 
+// getEtcdDataDir 获取 etcd 的数据目录
 func getEtcdDataDir(manifestPath string, cfg *kubeadmapi.InitConfiguration) (string, error) {
 	const etcdVolumeName = "etcd-data"
 	var dataDir string
@@ -77,8 +80,9 @@ func getEtcdDataDir(manifestPath string, cfg *kubeadmapi.InitConfiguration) (str
 	if cfg != nil && cfg.Etcd.Local != nil {
 		return cfg.Etcd.Local.DataDir, nil
 	}
-	klog.Warningln("[reset] No kubeadm config, using etcd pod spec to get data directory")
+	klog.Warningln("[重置] 没有 kubeadm 配置, 使用 etcd Pod 规范获取数据目录")
 
+	// 获取到 etcd 的那个 Pod 资源描述
 	etcdPod, err := utilstaticpod.ReadStaticPodFromDisk(manifestPath)
 	if err != nil {
 		return "", err
@@ -91,7 +95,7 @@ func getEtcdDataDir(manifestPath string, cfg *kubeadmapi.InitConfiguration) (str
 		}
 	}
 	if dataDir == "" {
-		return dataDir, errors.New("invalid etcd pod manifest")
+		return dataDir, errors.New("无效的 etcd Pod 清单")
 	}
 	return dataDir, nil
 }
