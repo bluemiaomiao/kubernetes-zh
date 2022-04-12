@@ -66,3 +66,10 @@ make -j 8
 Docker 容器将 SSH 端口映射到本机的8022端口, 你可以使用 IDE 的远程连接功能。
 
 > 注意: Windows 平台上基于 WSL2 的 Docker Desktop 客户端可能在执行类似于 ``git status`` 等命令时由于文件系统效率问题可能导致卡顿。 
+
+Ubuntu 系统可能由于语言环境问题将 ``/home/{user}`` 中的目录显示为非英文, 通过如下命令可以实现转换:
+
+```shell
+export LANG=en_US
+xdg-user-dirs-gtk-update
+```
